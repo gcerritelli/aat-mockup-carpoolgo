@@ -64,6 +64,17 @@
   .deuda-row .monto { font-weight: 700; color: #10321f; }
 
   .empty-mini { font-size: 13px; color: #93a69a; }
+
+  .day-toggle { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+  .day-toggle label {
+    margin: 0; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+    border: 1px solid #cfe0d4; border-radius: 50%; cursor: pointer; font-weight: 700; font-size: 12px;
+  }
+  .day-toggle input { position: absolute; opacity: 0; pointer-events: none; }
+  .day-toggle label:has(input:checked) { background: #e3f6ea; border-color: #4fd18b; color: #10321f; }
+
+  .checkbox-inline { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; color: #2b3c31; margin-top: 16px; cursor: pointer; }
+  .checkbox-inline input { width: 18px; height: 18px; }
 </style>
 </head>
 <body>
@@ -212,6 +223,21 @@
             <input type="number" id="km" min="1" step="0.1" placeholder="Ej. 12.5">
             <label for="min">Duración total (minutos)</label>
             <input type="number" id="min" min="1" placeholder="Ej. 35">
+
+            <label>¿Se repite en la semana? (opcional)</label>
+            <div class="day-toggle" id="dias-semana">
+              <label><input type="checkbox" value="L"><span>L</span></label>
+              <label><input type="checkbox" value="M"><span>M</span></label>
+              <label><input type="checkbox" value="Mi"><span>Mi</span></label>
+              <label><input type="checkbox" value="J"><span>J</span></label>
+              <label><input type="checkbox" value="V"><span>V</span></label>
+              <label><input type="checkbox" value="S"><span>S</span></label>
+              <label><input type="checkbox" value="D"><span>D</span></label>
+            </div>
+            <p class="hint">Si marcas días, calculamos el gasto multiplicado por esos días de la semana (para un ride que se repite). Si no marcas ninguno, se calcula solo por este viaje.</p>
+
+            <label class="checkbox-inline"><input type="checkbox" id="redondo"> Fue de ida y vuelta (redondo)</label>
+
             <p class="hint">Estimamos el costo con $${COSTO_POR_KM} MXN por km. Es un cálculo aproximado, no viene de GPS.</p>
             <button class="accion" id="btn-terminar">Calcular y dividir gasto</button>
             <div class="empty-mini" id="msg-ride-error" style="display:none;color:#9c2f2f;margin-top:8px;"></div>
@@ -230,8 +256,13 @@
             return;
           }
 
+          const dias = Array.from(document.querySelectorAll('#dias-semana input:checked')).map((el) => el.value);
+          const esRedondo = document.getElementById('redondo').checked;
+          const multiplicadorRedondo = esRedondo ? 2 : 1;
+          const multiplicadorDias = dias.length > 0 ? dias.length : 1;
+
           const pasajeros = ride.participantes.filter((uid) => uid !== ride.hostUid);
-          const costoTotal = km * COSTO_POR_KM;
+          const costoTotal = km * COSTO_POR_KM * multiplicadorRedondo * multiplicadorDias;
           const montoPorPasajero = pasajeros.length > 0 ? costoTotal / pasajeros.length : 0;
           const deudas = {};
           pasajeros.forEach((uid) => { deudas[uid] = montoPorPasajero; });
@@ -246,6 +277,8 @@
             destino: destino || null,
             distanciaKm: km,
             duracionMin: min || null,
+            dias: dias,
+            esRedondo: esRedondo,
             costoTotal: costoTotal,
             deudas: deudas,
             completadoEn: firebase.firestore.FieldValue.serverTimestamp()
@@ -299,6 +332,7 @@
             <h2>Ride completado</h2>
             <div class="costo-total">$${Math.round(ride.costoTotal || 0)} MXN</div>
             <div class="costo-nota">${ride.distanciaKm || '—'} km · ${ride.duracionMin || '—'} min · ${escapeHtml(ride.origen || '')}${ride.origen && ride.destino ? ' → ' : ''}${escapeHtml(ride.destino || '')}</div>
+            <div class="costo-nota">${ride.esRedondo ? 'Ida y vuelta' : 'Solo ida'}${ride.dias && ride.dias.length > 0 ? ` · Se repite: ${ride.dias.join(', ')} (×${ride.dias.length})` : ' · Viaje único'}</div>
           </div>
           ${panelDeuda}
           <div class="card">${listaParticipantesHtml}</div>

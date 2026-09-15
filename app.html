@@ -225,6 +225,15 @@
   .ride-estado.activo { background: #d6e9ff; color: #0d4a8a; }
   .ride-estado.completado { background: #e3f6ea; color: #10321f; }
   .ride-estado.rechazado { background: #fde8e8; color: #9c2f2f; }
+
+  .deuda-row-home {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px; padding: 10px 0; border-bottom: 1px solid #eef4ef; font-size: 14px;
+  }
+  .deuda-row-home:last-child { border-bottom: none; }
+  .deuda-row-home .monto { font-weight: 700; }
+  .deuda-row-home .monto.owe { color: #9c2f2f; }
+  .deuda-row-home .monto.owed { color: #10321f; }
   .avatar.avatar-sm { width: 34px; height: 34px; font-size: 13px; }
 
   textarea {
@@ -332,7 +341,7 @@
     <div class="loading" id="loading">Cargando...</div>
 
     <div class="view" id="view-home">
-      <div class="post-card">
+      <div class="post-card" style="margin-bottom: 16px;">
         <div class="post-head">
           <div class="avatar" id="avatar-home">?</div>
           <div class="who">
@@ -343,11 +352,22 @@
         <div class="post-body" id="descripcion-home">—</div>
         <div class="route-chip" id="ruta-home">Sin trayecto registrado</div>
       </div>
+
+      <div class="card">
+        <h2>Organiza un ride</h2>
+        <p style="font-size:14px;color:#445248;margin-bottom:12px;">Junta a tus amigos, elige quién maneja, y al final dividimos el gasto de gasolina entre todos.</p>
+        <a class="save" style="display:block;text-align:center;text-decoration:none;" href="crear-ride.html">Start a Ride</a>
+      </div>
+
+      <div class="card" id="card-adeudos-home">
+        <h2>Tus adeudos</h2>
+        <div id="lista-adeudos-home"><p class="empty-mini">Cargando...</p></div>
+      </div>
     </div>
 
     <div class="view" id="view-buscar">
       <div class="buscador-uni">
-        <input type="text" id="input-universidad" class="filtro" placeholder="Busca tu universidad..." autocomplete="off">
+        <input type="text" id="input-universidad" class="filtro" placeholder="Busca tu universidad o usuario..." autocomplete="off">
         <button id="btn-limpiar-uni" style="display:none;">✕</button>
         <div id="sugerencias-universidad" class="sugerencias"></div>
       </div>
@@ -742,7 +762,7 @@
     });
 
     let otrosUsuarios = [];
-    let filtroUniversidadActual = '';
+    let filtroBusqueda = { tipo: null, valor: '' };
 
     async function cargarBusqueda() {
       const contenedor = document.getElementById('resultados-buscar');
@@ -769,11 +789,16 @@
 
     function renderResultados() {
       const contenedor = document.getElementById('resultados-buscar');
-      const lista = otrosUsuarios.filter((u) => !filtroUniversidadActual || u.universidad === filtroUniversidadActual);
+      let lista = otrosUsuarios;
+      if (filtroBusqueda.tipo === 'universidad') {
+        lista = otrosUsuarios.filter((u) => u.universidad === filtroBusqueda.valor);
+      } else if (filtroBusqueda.tipo === 'usuario') {
+        lista = otrosUsuarios.filter((u) => u.id === filtroBusqueda.valor);
+      }
 
       if (lista.length === 0) {
-        contenedor.innerHTML = filtroUniversidadActual
-          ? `<div class="empty-state">Disculpa, por el momento todavía no tenemos a nadie que se encuentre en ${escapeHtml(filtroUniversidadActual)}.</div>`
+        contenedor.innerHTML = filtroBusqueda.tipo === 'universidad'
+          ? `<div class="empty-state">Disculpa, por el momento todavía no tenemos a nadie que se encuentre en ${escapeHtml(filtroBusqueda.valor)}.</div>`
           : '<div class="empty-state">Todavía no hay más usuarios que coincidan. Invita a tus compañeros a registrarse en CarpoolGo.</div>';
         return;
       }
@@ -821,12 +846,23 @@
         sugerenciasUniversidad.innerHTML = '';
         return;
       }
-      const coincidencias = todasLasUniversidades.filter((u) => u.toLowerCase().includes(q)).slice(0, 8);
+      const uniMatches = todasLasUniversidades
+        .filter((u) => u.toLowerCase().includes(q))
+        .slice(0, 5)
+        .map((u) => ({ tipo: 'universidad', valor: u, label: u }));
+
+      const userMatches = otrosUsuarios
+        .filter((u) => (u.nombre || '').toLowerCase().includes(q))
+        .slice(0, 5)
+        .map((u) => ({ tipo: 'usuario', valor: u.id, label: u.nombre || 'Sin nombre' }));
+
+      const coincidencias = [...userMatches, ...uniMatches].slice(0, 8);
+
       if (coincidencias.length === 0) {
         sugerenciasUniversidad.innerHTML = '<div class="sugerencia-item" style="color:#93a69a;cursor:default;">Sin coincidencias</div>';
       } else {
-        sugerenciasUniversidad.innerHTML = coincidencias.map((u) =>
-          `<div class="sugerencia-item" data-uni="${escapeHtml(u)}">${escapeHtml(u)}</div>`
+        sugerenciasUniversidad.innerHTML = coincidencias.map((c) =>
+          `<div class="sugerencia-item" data-tipo="${c.tipo}" data-valor="${escapeHtml(c.valor)}">${c.tipo === 'usuario' ? '👤' : '🎓'} ${escapeHtml(c.label)}</div>`
         ).join('');
       }
       sugerenciasUniversidad.classList.add('show');
@@ -835,7 +871,7 @@
     inputUniversidad.addEventListener('input', () => {
       mostrarSugerencias(inputUniversidad.value);
       if (!inputUniversidad.value.trim()) {
-        filtroUniversidadActual = '';
+        filtroBusqueda = { tipo: null, valor: '' };
         btnLimpiarUni.style.display = 'none';
         renderResultados();
       }
@@ -846,11 +882,14 @@
     });
 
     sugerenciasUniversidad.addEventListener('click', (e) => {
-      const item = e.target.closest('.sugerencia-item[data-uni]');
+      const item = e.target.closest('.sugerencia-item[data-valor]');
       if (!item) return;
-      const uni = item.dataset.uni;
-      inputUniversidad.value = uni;
-      filtroUniversidadActual = uni;
+      const tipo = item.dataset.tipo;
+      const valor = item.dataset.valor;
+      inputUniversidad.value = tipo === 'usuario'
+        ? (otrosUsuarios.find((u) => u.id === valor) || {}).nombre || ''
+        : valor;
+      filtroBusqueda = { tipo, valor };
       btnLimpiarUni.style.display = 'block';
       sugerenciasUniversidad.classList.remove('show');
       renderResultados();
@@ -858,7 +897,7 @@
 
     btnLimpiarUni.addEventListener('click', () => {
       inputUniversidad.value = '';
-      filtroUniversidadActual = '';
+      filtroBusqueda = { tipo: null, valor: '' };
       btnLimpiarUni.style.display = 'none';
       sugerenciasUniversidad.classList.remove('show');
       renderResultados();
@@ -1182,22 +1221,50 @@
       const contLista = document.getElementById('lista-mis-rides');
       if (rides.length === 0) {
         contLista.innerHTML = '<p class="empty-mini">Todavía no has organizado ni te han invitado a un ride.</p>';
+      } else {
+        contLista.innerHTML = rides.map((r) => {
+          const esHost = r.hostUid === uid;
+          const sub = r.estado === 'completado'
+            ? `$${Math.round(r.costoTotal || 0)} MXN en total`
+            : (r.estado === 'pendiente_host' ? 'Esperando que el host acepte' : `${r.participantes.length} personas en el ride`);
+          return `
+            <a class="ride-row" href="ride.html?id=${r.id}">
+              <div>
+                <div class="titulo">${esHost ? 'Tú manejas' : 'Ride con amigos'}</div>
+                <div class="sub">${sub}</div>
+              </div>
+              <span class="ride-estado ${r.estado}">${estadoRideLabel(r.estado)}</span>
+            </a>
+          `;
+        }).join('');
+      }
+
+      const balances = {};
+      rides.filter((r) => r.estado === 'completado').forEach((r) => {
+        const deudas = r.deudas || {};
+        if (r.hostUid === uid) {
+          Object.keys(deudas).forEach((pUid) => {
+            if (pUid === uid) return;
+            balances[pUid] = (balances[pUid] || 0) - deudas[pUid];
+          });
+        } else if (deudas[uid]) {
+          balances[r.hostUid] = (balances[r.hostUid] || 0) + deudas[uid];
+        }
+      });
+
+      const contAdeudos = document.getElementById('lista-adeudos-home');
+      const otrosUids = Object.keys(balances).filter((id) => Math.abs(balances[id]) > 0.5);
+      if (otrosUids.length === 0) {
+        contAdeudos.innerHTML = '<p class="empty-mini">Estás al día, no tienes adeudos pendientes.</p>';
         return;
       }
-      contLista.innerHTML = rides.map((r) => {
-        const esHost = r.hostUid === uid;
-        const sub = r.estado === 'completado'
-          ? `$${Math.round(r.costoTotal || 0)} MXN en total`
-          : (r.estado === 'pendiente_host' ? 'Esperando que el host acepte' : `${r.participantes.length} personas en el ride`);
-        return `
-          <a class="ride-row" href="ride.html?id=${r.id}">
-            <div>
-              <div class="titulo">${esHost ? 'Tú manejas' : 'Ride con amigos'}</div>
-              <div class="sub">${sub}</div>
-            </div>
-            <span class="ride-estado ${r.estado}">${estadoRideLabel(r.estado)}</span>
-          </a>
-        `;
+      const perfilesAdeudos = await Promise.all(otrosUids.map((id) => db.collection('usuarios').doc(id).get()));
+      contAdeudos.innerHTML = otrosUids.map((otroId, i) => {
+        const nombre = perfilesAdeudos[i].exists ? (perfilesAdeudos[i].data().nombre || 'Alguien') : 'Alguien';
+        const monto = balances[otroId];
+        return monto > 0
+          ? `<div class="deuda-row-home"><span>Le debes a ${escapeHtml(nombre)}</span><span class="monto owe">$${Math.round(monto)} MXN</span></div>`
+          : `<div class="deuda-row-home"><span>${escapeHtml(nombre)} te debe</span><span class="monto owed">$${Math.round(-monto)} MXN</span></div>`;
       }).join('');
     }
 
