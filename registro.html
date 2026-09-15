@@ -229,11 +229,12 @@
           creadoEn: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        msgSuccess.textContent = '¡Cuenta creada! Ya quedaste registrado en CarpoolGo.';
+        msgSuccess.textContent = '¡Cuenta creada! Ahora vamos a registrar tu trayecto...';
         msgSuccess.classList.add('show');
-        form.reset();
-        btnSubmit.textContent = 'Crear cuenta';
-        btnSubmit.disabled = false;
+        btnSubmit.textContent = 'Cuenta creada';
+        setTimeout(() => {
+          window.location.href = 'registrar-trayecto.html';
+        }, 1200);
       } catch (err) {
         let texto = 'Algo salió mal. Intenta de nuevo.';
         if (err.code === 'auth/email-already-in-use') texto = 'Ya existe una cuenta con ese correo.';

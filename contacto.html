@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contacto — CarpoolGo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; color: #1b2a22; background: #f4f9f5; }
+
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 40px;
+    background: #10321f;
+    color: #ffffff;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  nav .logo { font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
+  nav a.back { color: #d9ecd9; text-decoration: none; font-weight: 500; }
+  nav a.back:hover { color: #4fd18b; }
+
+  .hero {
+    background: linear-gradient(135deg, #10321f 0%, #1565c0 100%);
+    color: #ffffff;
+    text-align: center;
+    padding: 70px 20px 80px;
+  }
+  .hero h1 { font-size: 38px; margin-bottom: 14px; }
+  .hero p { font-size: 18px; max-width: 620px; margin: 0 auto; color: #e6f0ea; }
+  .hero-illustration { margin-top: 36px; }
+  .hero-illustration svg { display: block; margin: 0 auto; width: 100%; max-width: 300px; height: auto; }
+
+  main { max-width: 700px; margin: 0 auto; padding: 60px 24px 90px; }
+
+  .email-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 30px 32px;
+    box-shadow: 0 6px 18px rgba(16, 50, 31, 0.08);
+    border-left: 4px solid #4fd18b;
+    text-align: center;
+    margin-bottom: 50px;
+  }
+  .email-card p.label { font-size: 14px; font-weight: 700; color: #10321f; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+  .email-card a.email { font-size: 22px; font-weight: 700; color: #1565c0; text-decoration: none; }
+  .email-card a.email:hover { text-decoration: underline; }
+  .email-card p.responsable { margin-top: 10px; font-size: 14px; color: #445248; }
+
+  h2 { font-size: 22px; color: #10321f; margin-bottom: 24px; }
+
+  .reason-list { display: flex; flex-direction: column; gap: 18px; }
+  .reason {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 22px 24px;
+    box-shadow: 0 6px 18px rgba(16, 50, 31, 0.08);
+  }
+  .reason h3 { font-size: 17px; color: #10321f; margin-bottom: 6px; }
+  .reason p { font-size: 15px; line-height: 1.5; color: #445248; }
+
+  footer { background: #10321f; color: #cfe3d5; text-align: center; padding: 26px 20px; font-size: 14px; }
+
+  @media (max-width: 640px) {
+    nav { flex-direction: column; gap: 10px; padding: 16px 20px; }
+    .hero h1 { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+
+  <nav>
+    <div class="logo">CarpoolGo</div>
+    <a class="back" href="index.html">← Volver a Inicio</a>
+  </nav>
+
+  <section class="hero">
+    <h1>Hablemos</h1>
+    <p>Este proyecto lo está construyendo una sola persona por ahora, así que todo pasa por el mismo correo — respondo yo directamente.</p>
+    <div class="hero-illustration">
+      <svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+        <rect x="60" y="40" width="280" height="140" rx="16" fill="#ffffff"/>
+        <path d="M60,52 L200,140 L340,52" fill="none" stroke="#10321f" stroke-opacity="0.2" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="300" cy="150" r="26" fill="#4fd18b"/>
+        <path d="M290,150 L297,157 L312,140" fill="none" stroke="#10321f" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </section>
+
+  <main>
+    <div class="email-card">
+      <p class="label">Escríbeme directo</p>
+      <a class="email" href="mailto:Giancarlo@sideri.com.mx">Giancarlo@sideri.com.mx</a>
+      <p class="responsable">Giancarlo — fundador y responsable del proyecto</p>
+    </div>
+
+    <h2>¿Para qué me puedes escribir?</h2>
+    <div class="reason-list">
+      <div class="reason">
+        <h3>Dudas sobre tu cuenta o tu trayecto</h3>
+        <p>Problemas para registrarte, verificar tu identidad, o encontrar compañeros de ruta.</p>
+      </div>
+      <div class="reason">
+        <h3>Reportar un problema con otro usuario</h3>
+        <p>Cualquier incidente durante un viaje o comportamiento que no te haya parecido seguro.</p>
+      </div>
+      <div class="reason">
+        <h3>Alianzas y colaboraciones</h3>
+        <p>Si representas una empresa, universidad o comunidad interesada en llevar CarpoolGo a su gente.</p>
+      </div>
+      <div class="reason">
+        <h3>Prensa y medios</h3>
+        <p>Si quieres cubrir el proyecto o platicar sobre hacia dónde va CarpoolGo.</p>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2026 CarpoolGo. Todos los derechos reservados.
+  </footer>
+
+</body>
+</html>

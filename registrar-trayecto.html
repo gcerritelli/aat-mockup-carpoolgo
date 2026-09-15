@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registra tu Trayecto — CarpoolGo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; color: #1b2a22; background: #f4f9f5; }
+
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 40px;
+    background: #10321f;
+    color: #ffffff;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  nav .logo { font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
+  nav a.back { color: #d9ecd9; text-decoration: none; font-weight: 500; }
+  nav a.back:hover { color: #4fd18b; }
+
+  main { max-width: 600px; margin: 0 auto; padding: 50px 24px 90px; }
+  main h1 { font-size: 30px; color: #10321f; margin-bottom: 10px; }
+  main > p.intro { font-size: 16px; color: #445248; margin-bottom: 34px; line-height: 1.6; }
+
+  form {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 6px 18px rgba(16, 50, 31, 0.08);
+  }
+
+  fieldset { border: none; margin-bottom: 26px; }
+  legend { font-size: 15px; font-weight: 700; color: #10321f; margin-bottom: 14px; padding: 0; }
+
+  label { display: block; font-size: 14px; font-weight: 600; color: #2b3c31; margin-bottom: 6px; margin-top: 16px; }
+  label:first-of-type { margin-top: 0; }
+  .hint { font-size: 13px; color: #6b7d70; margin-top: 4px; }
+
+  input[type="text"], input[type="time"], input[type="number"] {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #cfe0d4;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: inherit;
+    color: #1b2a22;
+  }
+  input:focus { outline: 2px solid #4fd18b; border-color: transparent; }
+
+  .time-row { display: flex; gap: 12px; }
+  .time-row > div { flex: 1; }
+  .time-row label { margin-top: 0; }
+
+  .day-toggle { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+  .day-toggle label {
+    margin: 0;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #cfe0d4;
+    border-radius: 50%;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 13px;
+  }
+  .day-toggle input { position: absolute; opacity: 0; pointer-events: none; }
+  .day-toggle label:has(input:checked) { background: #e3f6ea; border-color: #4fd18b; color: #10321f; }
+
+  .checkbox-row { display: flex; align-items: flex-start; gap: 10px; margin-top: 16px; }
+  .checkbox-row input { margin-top: 4px; }
+  .checkbox-row label { margin: 0; font-weight: 500; font-size: 14px; line-height: 1.4; }
+
+  #regreso-fields { display: none; }
+  #regreso-fields.show { display: block; margin-top: 16px; }
+
+  button[type="submit"] {
+    width: 100%;
+    background: #4fd18b;
+    color: #0d2416;
+    border: none;
+    padding: 15px;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  button[type="submit"]:hover { background: #3fc07c; }
+  button[type="submit"]:disabled { opacity: 0.6; cursor: wait; }
+
+  .msg { margin-top: 16px; padding: 12px 16px; border-radius: 8px; font-size: 14px; display: none; }
+  .msg.show { display: block; }
+  .msg.error { background: #fde8e8; color: #9c2f2f; }
+  .msg.success { background: #e3f6ea; color: #10321f; }
+
+  footer { background: #10321f; color: #cfe3d5; text-align: center; padding: 26px 20px; font-size: 14px; }
+</style>
+</head>
+<body>
+
+  <nav>
+    <div class="logo">CarpoolGo</div>
+    <a class="back" href="index.html">← Volver a Inicio</a>
+  </nav>
+
+  <main>
+    <h1>Registra tu trayecto</h1>
+    <p class="intro">Con esto te empezamos a buscar compañeros de ruta. Mientras más preciso seas, mejor va a ser el match (ver <a href="trayecto.html">Registra tu Trayecto</a> y <a href="match.html">Encuentra Compañeros de Ruta</a>).</p>
+
+    <form id="form-trayecto">
+      <fieldset>
+        <legend>Tu ruta</legend>
+        <label for="origen">Punto de partida</label>
+        <input type="text" id="origen" placeholder="Dirección o zona aproximada" required>
+
+        <label for="destino">Destino</label>
+        <input type="text" id="destino" placeholder="Trabajo, escuela, etc." required>
+
+        <label for="radio">Radio de tolerancia (km)</label>
+        <input type="number" id="radio" min="1" max="15" value="3" required>
+        <p class="hint">Cuántos km de desvío aceptas para recoger o dejar a alguien en el camino.</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Horario de salida</legend>
+        <div class="time-row">
+          <div>
+            <label for="hora-desde">Desde</label>
+            <input type="time" id="hora-desde" value="07:00" required>
+          </div>
+          <div>
+            <label for="hora-hasta">Hasta</label>
+            <input type="time" id="hora-hasta" value="07:30" required>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Días de la semana</legend>
+        <div class="day-toggle">
+          <label><input type="checkbox" name="dia" value="L" checked><span>L</span></label>
+          <label><input type="checkbox" name="dia" value="M" checked><span>M</span></label>
+          <label><input type="checkbox" name="dia" value="Mi" checked><span>Mi</span></label>
+          <label><input type="checkbox" name="dia" value="J" checked><span>J</span></label>
+          <label><input type="checkbox" name="dia" value="V" checked><span>V</span></label>
+          <label><input type="checkbox" name="dia" value="S"><span>S</span></label>
+          <label><input type="checkbox" name="dia" value="D"><span>D</span></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Viaje de regreso</legend>
+        <div class="checkbox-row">
+          <input type="checkbox" id="check-regreso">
+          <label for="check-regreso">También quiero compartir mi viaje de regreso.</label>
+        </div>
+        <div id="regreso-fields">
+          <div class="time-row">
+            <div>
+              <label for="regreso-desde">Desde</label>
+              <input type="time" id="regreso-desde" value="17:30">
+            </div>
+            <div>
+              <label for="regreso-hasta">Hasta</label>
+              <input type="time" id="regreso-hasta" value="18:00">
+            </div>
+          </div>
+        </div>
+      </fieldset>
+
+      <button type="submit" id="btn-submit">Guardar trayecto</button>
+      <div class="msg error" id="msg-error"></div>
+      <div class="msg success" id="msg-success"></div>
+    </form>
+  </main>
+
+  <footer>&copy; 2026 CarpoolGo. Todos los derechos reservados.</footer>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBM9QJkGNsOP_6gqwKFagrFLrTDmkloboM",
+      authDomain: "carpoolgo-b7728.firebaseapp.com",
+      projectId: "carpoolgo-b7728",
+      storageBucket: "carpoolgo-b7728.firebasestorage.app",
+      messagingSenderId: "133384054341",
+      appId: "1:133384054341:web:f8ef0cdfaafbbe9ebf652c"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    let uidActual = null;
+    auth.onAuthStateChanged((user) => {
+      if (!user) {
+        window.location.href = 'registro.html';
+      } else {
+        uidActual = user.uid;
+      }
+    });
+
+    const checkRegreso = document.getElementById('check-regreso');
+    const regresoFields = document.getElementById('regreso-fields');
+    checkRegreso.addEventListener('change', () => {
+      regresoFields.classList.toggle('show', checkRegreso.checked);
+    });
+
+    const form = document.getElementById('form-trayecto');
+    const btnSubmit = document.getElementById('btn-submit');
+    const msgError = document.getElementById('msg-error');
+    const msgSuccess = document.getElementById('msg-success');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msgError.classList.remove('show');
+      msgSuccess.classList.remove('show');
+
+      if (!uidActual) {
+        msgError.textContent = 'Todavía no detectamos tu sesión. Espera un momento e intenta de nuevo.';
+        msgError.classList.add('show');
+        return;
+      }
+
+      btnSubmit.disabled = true;
+      btnSubmit.textContent = 'Guardando...';
+
+      const dias = Array.from(document.querySelectorAll('input[name="dia"]:checked')).map((el) => el.value);
+      const conRegreso = checkRegreso.checked;
+
+      try {
+        await db.collection('usuarios').doc(uidActual).collection('trayectos').add({
+          origen: document.getElementById('origen').value,
+          destino: document.getElementById('destino').value,
+          radioToleranciaKm: Number(document.getElementById('radio').value),
+          horarioDesde: document.getElementById('hora-desde').value,
+          horarioHasta: document.getElementById('hora-hasta').value,
+          dias: dias,
+          tieneRegreso: conRegreso,
+          regresoDesde: conRegreso ? document.getElementById('regreso-desde').value : null,
+          regresoHasta: conRegreso ? document.getElementById('regreso-hasta').value : null,
+          creadoEn: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        msgSuccess.textContent = '¡Trayecto guardado! Vamos a tu perfil...';
+        msgSuccess.classList.add('show');
+        btnSubmit.textContent = 'Trayecto guardado';
+        setTimeout(() => {
+          window.location.href = 'app.html';
+        }, 1000);
+      } catch (err) {
+        msgError.textContent = 'Algo salió mal guardando tu trayecto. Intenta de nuevo.';
+        msgError.classList.add('show');
+        btnSubmit.textContent = 'Guardar trayecto';
+        btnSubmit.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

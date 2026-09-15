@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarpoolGo — Tu app</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; color: #1b2a22; background: #dfe7e2; }
+
+  .phone {
+    max-width: 440px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: #f4f9f5;
+    padding-bottom: 90px;
+    position: relative;
+    box-shadow: 0 0 50px rgba(16, 50, 31, 0.12);
+  }
+
+  .topbar {
+    background: #10321f;
+    color: #ffffff;
+    padding: 18px 22px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .topbar .logo { font-size: 20px; font-weight: 700; }
+  .topbar .greeting { font-size: 13px; color: #b9d6c3; margin-top: 2px; }
+
+  .view { display: none; padding: 22px; }
+  .view.active { display: block; }
+
+  .loading { padding: 60px 22px; text-align: center; color: #6b7d70; }
+
+  /* Home / feed */
+  .post-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 6px 18px rgba(16, 50, 31, 0.08);
+  }
+  .post-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: #4fd18b; color: #0d2416;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 17px; flex-shrink: 0;
+  }
+  .post-head .who .name { font-weight: 700; font-size: 15px; color: #10321f; }
+  .post-head .who .tag { font-size: 12px; color: #6b7d70; }
+  .post-body { font-size: 15px; line-height: 1.5; color: #2b3c31; margin-bottom: 14px; white-space: pre-wrap; }
+  .post-body.empty { color: #93a69a; font-style: italic; }
+  .route-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #e3f6ea; color: #10321f;
+    font-size: 13px; font-weight: 600;
+    padding: 8px 12px; border-radius: 20px;
+  }
+  .empty-state { text-align: center; padding: 40px 10px; color: #6b7d70; font-size: 14px; }
+
+  /* Perfil */
+  .profile-header { text-align: center; margin-bottom: 24px; }
+  .profile-header .avatar { width: 68px; height: 68px; font-size: 26px; margin: 0 auto 12px; }
+  .profile-header h1 { font-size: 20px; color: #10321f; }
+  .profile-header p { font-size: 13px; color: #6b7d70; margin-top: 2px; }
+
+  .card { background: #ffffff; border-radius: 14px; padding: 18px 20px; box-shadow: 0 6px 18px rgba(16, 50, 31, 0.08); margin-bottom: 16px; }
+  .card h2 { font-size: 14px; color: #10321f; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.4px; }
+  .card p { font-size: 14px; color: #445248; line-height: 1.5; }
+  .card .row { display: flex; justify-content: space-between; font-size: 14px; padding: 6px 0; border-bottom: 1px solid #eef4ef; }
+  .card .row:last-child { border-bottom: none; }
+  .card .row span:first-child { color: #6b7d70; }
+  .card .row span:last-child { color: #10321f; font-weight: 600; }
+  .card a.link { color: #1565c0; font-size: 13px; font-weight: 600; text-decoration: none; }
+
+  textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 12px 14px;
+    border: 1px solid #cfe0d4;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    color: #1b2a22;
+    resize: vertical;
+  }
+  textarea:focus { outline: 2px solid #4fd18b; border-color: transparent; }
+
+  button.save {
+    margin-top: 10px;
+    background: #4fd18b;
+    color: #0d2416;
+    border: none;
+    padding: 11px 18px;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 24px;
+    cursor: pointer;
+  }
+  button.save:hover { background: #3fc07c; }
+  button.save:disabled { opacity: 0.6; cursor: wait; }
+
+  .save-msg { font-size: 13px; color: #10321f; margin-top: 8px; display: none; }
+  .save-msg.show { display: block; }
+
+  button.logout {
+    width: 100%;
+    background: none;
+    border: 1px solid #e0b4b4;
+    color: #9c2f2f;
+    padding: 12px;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .tabbar {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 440px;
+    background: #ffffff;
+    border-top: 1px solid #dde8e1;
+    display: flex;
+  }
+  .tabbar button {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 12px 0 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #93a69a;
+    cursor: pointer;
+  }
+  .tabbar button.active { color: #10321f; }
+  .tabbar button.active svg { stroke: #4fd18b; }
+  .tabbar svg { width: 22px; height: 22px; stroke: #93a69a; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .tabbar button.active svg { stroke: #10321f; }
+</style>
+</head>
+<body>
+
+  <div class="phone">
+    <div class="topbar">
+      <div class="logo">CarpoolGo</div>
+      <div class="greeting" id="greeting">Cargando tu cuenta...</div>
+    </div>
+
+    <div class="loading" id="loading">Cargando...</div>
+
+    <div class="view" id="view-home">
+      <div class="post-card">
+        <div class="post-head">
+          <div class="avatar" id="avatar-home">?</div>
+          <div class="who">
+            <div class="name" id="nombre-home">—</div>
+            <div class="tag">Tu publicación</div>
+          </div>
+        </div>
+        <div class="post-body" id="descripcion-home">—</div>
+        <div class="route-chip" id="ruta-home">Sin trayecto registrado</div>
+      </div>
+    </div>
+
+    <div class="view" id="view-perfil">
+      <div class="profile-header">
+        <div class="avatar" id="avatar-perfil">?</div>
+        <h1 id="nombre-perfil">—</h1>
+        <p id="correo-perfil">—</p>
+      </div>
+
+      <div class="card">
+        <h2>Tus datos</h2>
+        <div class="row"><span>Teléfono</span><span id="telefono-perfil">—</span></div>
+        <div class="row"><span>Rol</span><span id="rol-perfil">—</span></div>
+      </div>
+
+      <div class="card" id="card-trayecto">
+        <h2>Tu trayecto</h2>
+        <p id="trayecto-perfil">Todavía no has registrado un trayecto.</p>
+        <a class="link" href="registrar-trayecto.html">Registrar otro trayecto →</a>
+      </div>
+
+      <div class="card">
+        <h2>Cuéntale a tus compañeros de viaje sobre ti</h2>
+        <textarea id="descripcion-input" placeholder="Ej. Trabajo en Reforma, me gusta la música y siempre llevo café de más por si alguien quiere."></textarea>
+        <button class="save" id="btn-guardar-desc">Guardar descripción</button>
+        <div class="save-msg" id="save-msg">Guardado ✓</div>
+      </div>
+
+      <button class="logout" id="btn-logout">Cerrar sesión</button>
+    </div>
+  </div>
+
+  <div class="tabbar">
+    <button class="active" id="tab-home">
+      <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+      Inicio
+    </button>
+    <button id="tab-perfil">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg>
+      Perfil
+    </button>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBM9QJkGNsOP_6gqwKFagrFLrTDmkloboM",
+      authDomain: "carpoolgo-b7728.firebaseapp.com",
+      projectId: "carpoolgo-b7728",
+      storageBucket: "carpoolgo-b7728.firebasestorage.app",
+      messagingSenderId: "133384054341",
+      appId: "1:133384054341:web:f8ef0cdfaafbbe9ebf652c"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    const tabHome = document.getElementById('tab-home');
+    const tabPerfil = document.getElementById('tab-perfil');
+    const viewHome = document.getElementById('view-home');
+    const viewPerfil = document.getElementById('view-perfil');
+
+    function mostrarTab(nombre) {
+      const enHome = nombre === 'home';
+      viewHome.classList.toggle('active', enHome);
+      viewPerfil.classList.toggle('active', !enHome);
+      tabHome.classList.toggle('active', enHome);
+      tabPerfil.classList.toggle('active', !enHome);
+    }
+    tabHome.addEventListener('click', () => mostrarTab('home'));
+    tabPerfil.addEventListener('click', () => mostrarTab('perfil'));
+
+    document.getElementById('btn-logout').addEventListener('click', async () => {
+      await auth.signOut();
+      window.location.href = 'index.html';
+    });
+
+    function inicial(nombre) {
+      return (nombre || '?').trim().charAt(0).toUpperCase();
+    }
+
+    function textoTrayecto(t) {
+      const dias = (t.dias || []).join(', ');
+      let texto = `${t.origen} → ${t.destino} · ${t.horarioDesde}–${t.horarioHasta} · ${dias}`;
+      if (t.tieneRegreso) texto += ` · Regreso ${t.regresoDesde}–${t.regresoHasta}`;
+      return texto;
+    }
+
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        window.location.href = 'registro.html';
+        return;
+      }
+
+      const uid = user.uid;
+      const [usuarioDoc, trayectosSnap] = await Promise.all([
+        db.collection('usuarios').doc(uid).get(),
+        db.collection('usuarios').doc(uid).collection('trayectos').orderBy('creadoEn', 'desc').limit(1).get()
+      ]);
+
+      const datos = usuarioDoc.exists ? usuarioDoc.data() : {};
+      const nombre = datos.nombre || 'Sin nombre';
+      const descripcion = datos.descripcion || '';
+
+      document.getElementById('greeting').textContent = `Hola, ${nombre.split(' ')[0]}`;
+      document.getElementById('avatar-home').textContent = inicial(nombre);
+      document.getElementById('avatar-perfil').textContent = inicial(nombre);
+      document.getElementById('nombre-home').textContent = nombre;
+      document.getElementById('nombre-perfil').textContent = nombre;
+      document.getElementById('correo-perfil').textContent = datos.correo || '';
+      document.getElementById('telefono-perfil').textContent = datos.telefono || '—';
+      document.getElementById('rol-perfil').textContent = datos.esConductor ? 'Conductor' : 'Pasajero';
+      document.getElementById('descripcion-input').value = descripcion;
+
+      const descripcionHome = document.getElementById('descripcion-home');
+      if (descripcion) {
+        descripcionHome.textContent = descripcion;
+        descripcionHome.classList.remove('empty');
+      } else {
+        descripcionHome.textContent = 'Todavía no has escrito nada sobre ti. Ve a tu Perfil para agregar una descripción.';
+        descripcionHome.classList.add('empty');
+      }
+
+      if (!trayectosSnap.empty) {
+        const t = trayectosSnap.docs[0].data();
+        document.getElementById('ruta-home').textContent = textoTrayecto(t);
+        document.getElementById('trayecto-perfil').textContent = textoTrayecto(t);
+      }
+
+      document.getElementById('loading').style.display = 'none';
+      mostrarTab('home');
+    });
+
+    document.getElementById('btn-guardar-desc').addEventListener('click', async () => {
+      const btn = document.getElementById('btn-guardar-desc');
+      const msg = document.getElementById('save-msg');
+      const uid = auth.currentUser && auth.currentUser.uid;
+      if (!uid) return;
+
+      btn.disabled = true;
+      btn.textContent = 'Guardando...';
+      const valor = document.getElementById('descripcion-input').value;
+
+      await db.collection('usuarios').doc(uid).set({ descripcion: valor }, { merge: true });
+
+      const descripcionHome = document.getElementById('descripcion-home');
+      if (valor) {
+        descripcionHome.textContent = valor;
+        descripcionHome.classList.remove('empty');
+      } else {
+        descripcionHome.textContent = 'Todavía no has escrito nada sobre ti. Ve a tu Perfil para agregar una descripción.';
+        descripcionHome.classList.add('empty');
+      }
+
+      btn.disabled = false;
+      btn.textContent = 'Guardar descripción';
+      msg.classList.add('show');
+      setTimeout(() => msg.classList.remove('show'), 2000);
+    });
+  </script>
+</body>
+</html>
