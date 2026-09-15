@@ -1,3 +1,5 @@
+$ cat /Users/giancarlocerritelli/Desktop/index.html
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -61,10 +63,9 @@
     color: #10321f;
   }
   .card-grid {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 28px;
-    justify-content: center;
     max-width: 1100px;
     margin: 0 auto;
   }
@@ -72,7 +73,6 @@
     background: #ffffff;
     border-radius: 14px;
     padding: 32px 28px;
-    width: 300px;
     box-shadow: 0 6px 18px rgba(16, 50, 31, 0.08);
     border-top: 4px solid #4fd18b;
     transition: transform 0.2s;
@@ -137,9 +137,14 @@
         <p>Te conectamos con personas cercanas que recorren un camino muy similar al tuyo, en horarios compatibles.</p>
       </div>
       <div class="card">
-        <span class="stat">-40% en gasolina</span>
+        <span class="stat">Costo compartido</span>
         <h3>Organiza y Ahorra</h3>
-        <p>Coordinen quién maneja cada día, dividan el gasto de gasolina y reduzcan juntos el tráfico y las emisiones de CO2.</p>
+        <p>Coordinen quién maneja cada día y dividan el gasto de gasolina entre todos, en vez de pagarlo solos.</p>
+      </div>
+      <div class="card">
+        <span class="stat">100% verificados</span>
+        <h3>Viaja con Confianza</h3>
+        <p>Cada perfil confirma su identidad y muestra las calificaciones de viajes anteriores, para que sepas con quién subes al carro antes de aceptar.</p>
       </div>
     </div>
   </section>
