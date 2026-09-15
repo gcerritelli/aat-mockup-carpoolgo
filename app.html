@@ -48,7 +48,9 @@
     background: #4fd18b; color: #0d2416;
     display: flex; align-items: center; justify-content: center;
     font-weight: 700; font-size: 17px; flex-shrink: 0;
+    overflow: hidden;
   }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .post-head .who .name { font-weight: 700; font-size: 15px; color: #10321f; }
   .post-head .who .tag { font-size: 12px; color: #6b7d70; }
   .post-body { font-size: 15px; line-height: 1.5; color: #2b3c31; margin-bottom: 14px; white-space: pre-wrap; }
@@ -66,6 +68,20 @@
   .profile-header .avatar { width: 68px; height: 68px; font-size: 26px; margin: 0 auto 12px; }
   .profile-header h1 { font-size: 20px; color: #10321f; }
   .profile-header p { font-size: 13px; color: #6b7d70; margin-top: 2px; }
+  .avatar-wrap { position: relative; width: 68px; margin: 0 auto 12px; }
+  .avatar-wrap .avatar { margin: 0; }
+  .avatar-edit {
+    position: absolute; bottom: -2px; right: -2px;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: #10321f; color: #ffffff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; cursor: pointer; border: 2px solid #f4f9f5;
+  }
+  .foto-msg { font-size: 12px; color: #10321f; margin-top: 8px; }
+  .uni-tag { color: #1565c0; font-weight: 600; font-size: 13px; margin-top: 2px; }
+  .rides-count { font-size: 12px; color: #6b7d70; margin-top: 2px; }
+  .back-link { background: none; border: none; padding: 0; margin-bottom: 18px; color: #1565c0; font-weight: 600; font-size: 14px; cursor: pointer; }
+  .rides-big { font-size: 26px; font-weight: 700; color: #10321f; margin-bottom: 12px; }
 
   .card { background: #ffffff; border-radius: 14px; padding: 18px 20px; box-shadow: 0 6px 18px rgba(16, 50, 31, 0.08); margin-bottom: 16px; }
   .card h2 { font-size: 14px; color: #10321f; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.4px; }
@@ -118,6 +134,37 @@
     font-size: 11px; font-weight: 600;
     padding: 4px 9px; border-radius: 12px;
   }
+  .user-card .acciones { margin-top: 10px; }
+
+  .btn-mini {
+    display: inline-block;
+    border: none;
+    border-radius: 20px;
+    padding: 7px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .btn-mini.agregar { background: #4fd18b; color: #0d2416; }
+  .btn-mini.agregar:hover { background: #3fc07c; }
+  .btn-mini.pendiente { background: #eef4ef; color: #6b7d70; cursor: default; }
+  .btn-mini.amigos { background: #e3f6ea; color: #10321f; cursor: default; }
+  .btn-mini.rechazar { background: #fde8e8; color: #9c2f2f; margin-left: 8px; }
+  .btn-mini:disabled { opacity: 0.7; cursor: default; }
+
+  .solicitud-row, .amigo-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid #eef4ef;
+  }
+  .solicitud-row:last-child, .amigo-row:last-child { border-bottom: none; }
+  .solicitud-row .who, .amigo-row .who { display: flex; align-items: center; gap: 10px; }
+  .solicitud-row .name, .amigo-row .name { font-size: 14px; font-weight: 600; color: #10321f; }
+  .empty-mini { font-size: 13px; color: #93a69a; }
+  .avatar.avatar-sm { width: 34px; height: 34px; font-size: 13px; }
 
   textarea {
     width: 100%;
@@ -225,11 +272,48 @@
       </div>
     </div>
 
+    <div class="view" id="view-perfil-usuario">
+      <button class="back-link" id="btn-volver-usuario">← Volver</button>
+      <div class="profile-header">
+        <div class="avatar" id="avatar-detalle" style="width:68px;height:68px;font-size:26px;margin:0 auto 12px;">?</div>
+        <h1 id="nombre-detalle">—</h1>
+        <p class="uni-tag" id="universidad-detalle"></p>
+      </div>
+      <div class="card" id="card-relacion-detalle"></div>
+      <div class="card" id="card-descripcion-detalle" style="display:none;">
+        <h2>Sobre mí</h2>
+        <p id="descripcion-detalle"></p>
+      </div>
+      <div class="card" id="card-trayecto-detalle" style="display:none;">
+        <h2>Trayecto</h2>
+        <p id="trayecto-detalle"></p>
+      </div>
+      <div class="card">
+        <h2>Sus amigos</h2>
+        <div id="lista-amigos-detalle"><p class="empty-mini">Cargando...</p></div>
+      </div>
+    </div>
+
     <div class="view" id="view-perfil">
       <div class="profile-header">
-        <div class="avatar" id="avatar-perfil">?</div>
+        <div class="avatar-wrap">
+          <div class="avatar" id="avatar-perfil">?</div>
+          <label class="avatar-edit" for="foto-input" title="Cambiar foto">✎</label>
+          <input type="file" id="foto-input" accept="image/*" style="display:none;">
+        </div>
         <h1 id="nombre-perfil">—</h1>
         <p id="correo-perfil">—</p>
+        <p class="foto-msg" id="foto-msg" style="display:none;"></p>
+      </div>
+
+      <div class="card" id="card-solicitudes">
+        <h2>Solicitudes de amistad</h2>
+        <div id="lista-solicitudes"><p style="font-size:14px;color:#6b7d70;">Cargando...</p></div>
+      </div>
+
+      <div class="card" id="card-amigos">
+        <h2>Tus amigos</h2>
+        <div id="lista-amigos"><p style="font-size:14px;color:#6b7d70;">Cargando...</p></div>
       </div>
 
       <div class="card">
@@ -385,6 +469,7 @@
     let busquedaCargada = false;
 
     function mostrarTab(nombre) {
+      document.getElementById('view-perfil-usuario').classList.remove('active');
       viewHome.classList.toggle('active', nombre === 'home');
       viewBuscar.classList.toggle('active', nombre === 'buscar');
       viewPerfil.classList.toggle('active', nombre === 'perfil');
@@ -410,6 +495,52 @@
       const div = document.createElement('div');
       div.textContent = texto == null ? '' : String(texto);
       return div.innerHTML;
+    }
+
+    function avatarContenido(fotoURL, nombre) {
+      return fotoURL ? `<img src="${fotoURL}" alt="">` : escapeHtml(inicial(nombre));
+    }
+
+    function pintarAvatar(el, fotoURL, nombre) {
+      if (fotoURL) {
+        el.innerHTML = `<img src="${fotoURL}" alt="">`;
+      } else {
+        el.textContent = inicial(nombre);
+      }
+    }
+
+    function comprimirImagen(file, maxAncho, maxAlto, calidad) {
+      return new Promise((resolve, reject) => {
+        const lector = new FileReader();
+        lector.onload = (ev) => {
+          const img = new Image();
+          img.onload = () => {
+            const ratio = Math.min(maxAncho / img.width, maxAlto / img.height, 1);
+            const w = Math.round(img.width * ratio);
+            const h = Math.round(img.height * ratio);
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', calidad));
+          };
+          img.onerror = () => reject(new Error('No se pudo leer la imagen'));
+          img.src = ev.target.result;
+        };
+        lector.onerror = () => reject(new Error('No se pudo leer el archivo'));
+        lector.readAsDataURL(file);
+      });
+    }
+
+    function insigniaPara(rides) {
+      const niveles = [
+        { min: 50, emoji: '💎', label: 'Diamante' },
+        { min: 30, emoji: '🥇', label: 'Oro' },
+        { min: 15, emoji: '🥈', label: 'Plata' },
+        { min: 5, emoji: '🥉', label: 'Bronce' },
+        { min: 1, emoji: '🚗', label: 'Primer Ride' }
+      ];
+      return niveles.find((n) => rides >= n.min) || null;
     }
 
     function inicial(nombre) {
@@ -440,10 +571,12 @@
       const descripcion = datos.descripcion || '';
       const universidad = datos.universidad || '';
       const estado = datos.estado || '';
+      const fotoURL = datos.fotoURL || null;
+      miPerfil = { nombre, fotoURL };
 
       document.getElementById('greeting').textContent = `Hola, ${nombre.split(' ')[0]}`;
-      document.getElementById('avatar-home').textContent = inicial(nombre);
-      document.getElementById('avatar-perfil').textContent = inicial(nombre);
+      pintarAvatar(document.getElementById('avatar-home'), fotoURL, nombre);
+      pintarAvatar(document.getElementById('avatar-perfil'), fotoURL, nombre);
       document.getElementById('nombre-home').textContent = nombre;
       document.getElementById('nombre-perfil').textContent = nombre;
       document.getElementById('correo-perfil').textContent = datos.correo || '';
@@ -467,6 +600,8 @@
         document.getElementById('ruta-home').textContent = textoTrayecto(t);
         document.getElementById('trayecto-perfil').textContent = textoTrayecto(t);
       }
+
+      relacionesPromise = cargarRelaciones(uid);
 
       document.getElementById('loading').style.display = 'none';
       mostrarTab('home');
@@ -508,6 +643,7 @@
       const uidPropio = auth.currentUser && auth.currentUser.uid;
 
       try {
+        if (relacionesPromise) await relacionesPromise;
         const snap = await db.collection('usuarios').get();
         const candidatos = snap.docs.filter((doc) => doc.id !== uidPropio);
 
@@ -551,14 +687,24 @@
         if (u.trayecto) tags.push(`${u.trayecto.origen} → ${u.trayecto.destino}`);
         if (u.trayecto) tags.push(`${u.trayecto.horarioDesde}–${u.trayecto.horarioHasta}`);
 
+        let accionHtml;
+        if (misAmigos.has(u.id)) {
+          accionHtml = `<button class="btn-mini amigos" disabled>Ya son amigos ✓</button>`;
+        } else if (solicitudesEnviadas.has(u.id)) {
+          accionHtml = `<button class="btn-mini pendiente" disabled>Solicitud enviada</button>`;
+        } else {
+          accionHtml = `<button class="btn-mini agregar" data-accion="agregar" data-uid="${escapeHtml(u.id)}">+ Agregar</button>`;
+        }
+
         return `
           <div class="user-card">
-            <div class="avatar">${escapeHtml(inicial(u.nombre))}</div>
+            <div class="avatar" data-abrir-perfil="${escapeHtml(u.id)}" style="cursor:pointer;">${avatarContenido(u.fotoURL, u.nombre)}</div>
             <div>
-              <div class="name">${escapeHtml(u.nombre || 'Sin nombre')}</div>
+              <div class="name" data-abrir-perfil="${escapeHtml(u.id)}" style="cursor:pointer;">${escapeHtml(u.nombre || 'Sin nombre')}</div>
               ${u.universidad ? `<div class="uni">${escapeHtml(u.universidad)}</div>` : ''}
               ${u.descripcion ? `<div class="desc">${escapeHtml(u.descripcion)}</div>` : ''}
               <div class="tags">${tags.map((t) => `<span class="tag-chip">${escapeHtml(t)}</span>`).join('')}</div>
+              <div class="acciones">${accionHtml}</div>
             </div>
           </div>
         `;
@@ -566,6 +712,284 @@
     }
 
     document.getElementById('filtro-universidad').addEventListener('change', renderResultados);
+
+    let miPerfil = { nombre: '', fotoURL: null };
+    let relacionesPromise = null;
+    let misAmigos = new Set();
+    let solicitudesEnviadas = new Set();
+    let solicitudesRecibidas = [];
+    let amigosCompletos = [];
+    let perfilAbiertoUid = null;
+
+    async function cargarRelaciones(uid) {
+      const [amigosSnap, enviadasSnap, recibidasSnap] = await Promise.all([
+        db.collection('usuarios').doc(uid).collection('amigos').get(),
+        db.collection('solicitudes').where('de', '==', uid).get(),
+        db.collection('solicitudes').where('para', '==', uid).get()
+      ]);
+
+      misAmigos = new Set(amigosSnap.docs.map((d) => d.id));
+      solicitudesEnviadas = new Set(
+        enviadasSnap.docs.filter((d) => d.data().estado === 'pendiente').map((d) => d.data().para)
+      );
+      solicitudesRecibidas = recibidasSnap.docs
+        .filter((d) => d.data().estado === 'pendiente')
+        .map((d) => ({ id: d.id, ...d.data() }));
+
+      amigosCompletos = await Promise.all(amigosSnap.docs.map(async (d) => {
+        const amistad = d.data();
+        const perfilDoc = await db.collection('usuarios').doc(d.id).get();
+        const perfil = perfilDoc.exists ? perfilDoc.data() : {};
+        return {
+          id: d.id,
+          nombre: amistad.nombre,
+          rides: amistad.rides || 0,
+          fotoURL: perfil.fotoURL || null,
+          universidad: perfil.universidad || ''
+        };
+      }));
+
+      renderSolicitudes();
+      renderAmigos();
+    }
+
+    function renderSolicitudes() {
+      const cont = document.getElementById('lista-solicitudes');
+      if (solicitudesRecibidas.length === 0) {
+        cont.innerHTML = '<p class="empty-mini">No tienes solicitudes pendientes.</p>';
+        return;
+      }
+      cont.innerHTML = solicitudesRecibidas.map((s) => `
+        <div class="solicitud-row">
+          <div class="who" data-abrir-perfil="${escapeHtml(s.de)}" style="cursor:pointer;">
+            <div class="avatar avatar-sm">${escapeHtml(inicial(s.deNombre))}</div>
+            <div class="name">${escapeHtml(s.deNombre || 'Alguien')}</div>
+          </div>
+          <div>
+            <button class="btn-mini agregar" data-accion="aceptar" data-de="${escapeHtml(s.de)}" data-id="${escapeHtml(s.id)}">Aceptar</button>
+            <button class="btn-mini rechazar" data-accion="rechazar" data-id="${escapeHtml(s.id)}">Rechazar</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderAmigos() {
+      const cont = document.getElementById('lista-amigos');
+      if (amigosCompletos.length === 0) {
+        cont.innerHTML = '<p class="empty-mini">Todavía no tienes amigos agregados. Ve a Buscar para encontrar compañeros.</p>';
+        return;
+      }
+      cont.innerHTML = amigosCompletos.map((a) => {
+        const insignia = insigniaPara(a.rides);
+        return `
+          <div class="amigo-row">
+            <div class="who" data-abrir-perfil="${escapeHtml(a.id)}" style="cursor:pointer;">
+              <div class="avatar avatar-sm">${avatarContenido(a.fotoURL, a.nombre)}</div>
+              <div>
+                <div class="name">${escapeHtml(a.nombre || 'Sin nombre')} ${insignia ? insignia.emoji : ''}</div>
+                <div class="rides-count">${a.rides || 0} ride${a.rides === 1 ? '' : 's'} juntos</div>
+              </div>
+            </div>
+            <button class="btn-mini agregar" data-accion="ride" data-uid="${escapeHtml(a.id)}">Let's Ride 🚗</button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function enviarSolicitud(paraUid, btnEl) {
+      const miUid = auth.currentUser && auth.currentUser.uid;
+      if (!miUid || miUid === paraUid) return;
+
+      btnEl.disabled = true;
+      btnEl.textContent = 'Enviando...';
+
+      try {
+        await db.collection('solicitudes').doc(`${miUid}_${paraUid}`).set({
+          de: miUid,
+          para: paraUid,
+          deNombre: miPerfil.nombre,
+          estado: 'pendiente',
+          creadoEn: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        solicitudesEnviadas.add(paraUid);
+        btnEl.textContent = 'Solicitud enviada';
+        btnEl.classList.remove('agregar');
+        btnEl.classList.add('pendiente');
+      } catch (err) {
+        btnEl.disabled = false;
+        btnEl.textContent = '+ Agregar';
+      }
+    }
+
+    async function registrarRide(amigoUid, btnEl) {
+      const miUid = auth.currentUser && auth.currentUser.uid;
+      if (!miUid) return;
+      if (btnEl) { btnEl.disabled = true; btnEl.textContent = 'Registrando...'; }
+
+      const incremento = firebase.firestore.FieldValue.increment(1);
+      await Promise.all([
+        db.collection('usuarios').doc(miUid).collection('amigos').doc(amigoUid).set({ rides: incremento }, { merge: true }),
+        db.collection('usuarios').doc(amigoUid).collection('amigos').doc(miUid).set({ rides: incremento }, { merge: true })
+      ]);
+
+      const entry = amigosCompletos.find((a) => a.id === amigoUid);
+      if (entry) entry.rides = (entry.rides || 0) + 1;
+      renderAmigos();
+
+      if (perfilAbiertoUid === amigoUid) {
+        await abrirPerfilUsuario(amigoUid);
+      }
+    }
+
+    document.getElementById('lista-solicitudes').addEventListener('click', async (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const accion = btn.dataset.accion;
+      const solicitudId = btn.dataset.id;
+      const miUid = auth.currentUser && auth.currentUser.uid;
+      if (!miUid) return;
+
+      if (accion === 'aceptar') {
+        btn.disabled = true;
+        btn.textContent = 'Aceptando...';
+        const deUid = btn.dataset.de;
+        const solicitud = solicitudesRecibidas.find((s) => s.id === solicitudId);
+        const deNombre = solicitud ? solicitud.deNombre : 'Alguien';
+
+        await db.collection('solicitudes').doc(solicitudId).set({ estado: 'aceptada' }, { merge: true });
+        await db.collection('usuarios').doc(miUid).collection('amigos').doc(deUid).set({
+          nombre: deNombre,
+          rides: 0,
+          desde: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        await db.collection('usuarios').doc(deUid).collection('amigos').doc(miUid).set({
+          nombre: miPerfil.nombre,
+          rides: 0,
+          desde: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        solicitudesRecibidas = solicitudesRecibidas.filter((s) => s.id !== solicitudId);
+        misAmigos.add(deUid);
+        renderSolicitudes();
+        await cargarRelaciones(miUid);
+      } else if (accion === 'rechazar') {
+        btn.disabled = true;
+        await db.collection('solicitudes').doc(solicitudId).delete();
+        solicitudesRecibidas = solicitudesRecibidas.filter((s) => s.id !== solicitudId);
+        renderSolicitudes();
+      }
+    });
+
+    async function abrirPerfilUsuario(uid) {
+      const miUid = auth.currentUser && auth.currentUser.uid;
+      if (!miUid || uid === miUid) return;
+
+      perfilAbiertoUid = uid;
+      document.querySelectorAll('.view').forEach((v) => v.classList.remove('active'));
+      document.getElementById('view-perfil-usuario').classList.add('active');
+      document.querySelectorAll('.tabbar button').forEach((b) => b.classList.remove('active'));
+
+      document.getElementById('nombre-detalle').textContent = 'Cargando...';
+      document.getElementById('universidad-detalle').textContent = '';
+      document.getElementById('card-relacion-detalle').innerHTML = '';
+      document.getElementById('card-descripcion-detalle').style.display = 'none';
+      document.getElementById('card-trayecto-detalle').style.display = 'none';
+      document.getElementById('lista-amigos-detalle').innerHTML = '<p class="empty-mini">Cargando...</p>';
+
+      const [perfilDoc, trayectoSnap, amigosDeElSnap] = await Promise.all([
+        db.collection('usuarios').doc(uid).get(),
+        db.collection('usuarios').doc(uid).collection('trayectos').orderBy('creadoEn', 'desc').limit(1).get(),
+        db.collection('usuarios').doc(uid).collection('amigos').get()
+      ]);
+
+      const datos = perfilDoc.exists ? perfilDoc.data() : {};
+      const nombre = datos.nombre || 'Sin nombre';
+
+      pintarAvatar(document.getElementById('avatar-detalle'), datos.fotoURL || null, nombre);
+      document.getElementById('nombre-detalle').textContent = nombre;
+      document.getElementById('universidad-detalle').textContent = datos.universidad || '';
+
+      if (datos.descripcion) {
+        document.getElementById('descripcion-detalle').textContent = datos.descripcion;
+        document.getElementById('card-descripcion-detalle').style.display = 'block';
+      }
+
+      if (!trayectoSnap.empty) {
+        document.getElementById('trayecto-detalle').textContent = textoTrayecto(trayectoSnap.docs[0].data());
+        document.getElementById('card-trayecto-detalle').style.display = 'block';
+      }
+
+      const relCard = document.getElementById('card-relacion-detalle');
+      if (misAmigos.has(uid)) {
+        const amistadDoc = await db.collection('usuarios').doc(miUid).collection('amigos').doc(uid).get();
+        const rides = amistadDoc.exists ? (amistadDoc.data().rides || 0) : 0;
+        const insignia = insigniaPara(rides);
+        relCard.innerHTML = `
+          <h2>Su amistad contigo</h2>
+          <div class="rides-big">${rides} ride${rides === 1 ? '' : 's'} juntos ${insignia ? insignia.emoji : ''}</div>
+          <button class="btn-mini agregar" data-accion="ride" data-uid="${escapeHtml(uid)}">Let's Ride 🚗</button>
+        `;
+      } else {
+        const pendiente = solicitudesEnviadas.has(uid);
+        relCard.innerHTML = pendiente
+          ? `<button class="btn-mini pendiente" disabled>Solicitud enviada</button>`
+          : `<button class="btn-mini agregar" data-accion="agregar" data-uid="${escapeHtml(uid)}">+ Agregar</button>`;
+      }
+
+      const contAmigos = document.getElementById('lista-amigos-detalle');
+      if (amigosDeElSnap.empty) {
+        contAmigos.innerHTML = '<p class="empty-mini">Todavía no tiene amigos agregados.</p>';
+      } else {
+        contAmigos.innerHTML = amigosDeElSnap.docs.map((d) => {
+          const a = d.data();
+          return `
+            <div class="amigo-row">
+              <div class="who" data-abrir-perfil="${escapeHtml(d.id)}" style="cursor:pointer;">
+                <div class="avatar avatar-sm">${escapeHtml(inicial(a.nombre))}</div>
+                <div class="name">${escapeHtml(a.nombre || 'Sin nombre')}</div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    document.getElementById('btn-volver-usuario').addEventListener('click', () => mostrarTab('buscar'));
+
+    document.querySelector('.phone').addEventListener('click', (e) => {
+      const agregarBtn = e.target.closest('button[data-accion="agregar"]');
+      if (agregarBtn) { enviarSolicitud(agregarBtn.dataset.uid, agregarBtn); return; }
+
+      const rideBtn = e.target.closest('button[data-accion="ride"]');
+      if (rideBtn) { registrarRide(rideBtn.dataset.uid, rideBtn); return; }
+
+      const abrir = e.target.closest('[data-abrir-perfil]');
+      if (abrir) { abrirPerfilUsuario(abrir.dataset.abrirPerfil); }
+    });
+
+    document.getElementById('foto-input').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const uid = auth.currentUser && auth.currentUser.uid;
+      if (!uid) return;
+
+      const msg = document.getElementById('foto-msg');
+      msg.style.display = 'block';
+      msg.textContent = 'Subiendo foto...';
+
+      try {
+        const dataUrl = await comprimirImagen(file, 240, 240, 0.82);
+        await db.collection('usuarios').doc(uid).set({ fotoURL: dataUrl }, { merge: true });
+        miPerfil.fotoURL = dataUrl;
+        pintarAvatar(document.getElementById('avatar-perfil'), dataUrl, miPerfil.nombre);
+        pintarAvatar(document.getElementById('avatar-home'), dataUrl, miPerfil.nombre);
+        msg.textContent = 'Foto actualizada ✓';
+        setTimeout(() => { msg.style.display = 'none'; }, 2000);
+      } catch (err) {
+        msg.textContent = 'No se pudo subir la foto. Intenta con otra imagen.';
+      }
+    });
   </script>
 </body>
 </html>
