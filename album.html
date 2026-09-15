@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Álbum — CarpoolGo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; color: #1b2a22; background: #dfe7e2; }
+
+  .phone { max-width: 440px; margin: 0 auto; min-height: 100vh; background: #f4f9f5; box-shadow: 0 0 50px rgba(16, 50, 31, 0.12); padding-bottom: 40px; }
+
+  .topbar {
+    background: #10321f;
+    color: #ffffff;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+  }
+  .topbar a.back { color: #d9ecd9; text-decoration: none; font-size: 20px; }
+  .topbar .titulo { font-size: 16px; font-weight: 700; }
+  .topbar .sub { font-size: 12px; color: #b9d6c3; }
+
+  main { padding: 16px; }
+  .intro { font-size: 13px; color: #6b7d70; margin-bottom: 16px; line-height: 1.5; }
+
+  .btn-subir {
+    display: block;
+    width: 100%;
+    background: #4fd18b;
+    color: #0d2416;
+    border: none;
+    padding: 13px;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 24px;
+    cursor: pointer;
+    margin-bottom: 18px;
+    text-align: center;
+  }
+  .btn-subir:disabled { opacity: 0.6; cursor: wait; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .foto {
+    aspect-ratio: 1;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #e3f6ea;
+  }
+  .foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .empty-state { text-align: center; padding: 50px 24px; color: #6b7d70; font-size: 14px; }
+</style>
+</head>
+<body>
+
+  <div class="phone">
+    <div class="topbar">
+      <a class="back" href="#" id="link-volver">←</a>
+      <div>
+        <div class="titulo">Álbum compartido</div>
+        <div class="sub" id="sub-nombre">Cargando...</div>
+      </div>
+    </div>
+    <main>
+      <p class="intro">Solo tú y esta persona pueden ver y subir fotos aquí.</p>
+      <button class="btn-subir" id="btn-subir">+ Subir foto</button>
+      <input type="file" id="foto-input" accept="image/*" style="display:none;">
+      <div class="grid" id="grid-fotos">
+        <div class="empty-state" style="grid-column: 1 / -1;">Cargando álbum...</div>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBM9QJkGNsOP_6gqwKFagrFLrTDmkloboM",
+      authDomain: "carpoolgo-b7728.firebaseapp.com",
+      projectId: "carpoolgo-b7728",
+      storageBucket: "carpoolgo-b7728.firebasestorage.app",
+      messagingSenderId: "133384054341",
+      appId: "1:133384054341:web:f8ef0cdfaafbbe9ebf652c"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    function chatIdPara(a, b) {
+      return [a, b].sort().join('_');
+    }
+
+    function comprimirImagen(file, maxAncho, maxAlto, calidad) {
+      return new Promise((resolve, reject) => {
+        const lector = new FileReader();
+        lector.onload = (ev) => {
+          const img = new Image();
+          img.onload = () => {
+            const ratio = Math.min(maxAncho / img.width, maxAlto / img.height, 1);
+            const w = Math.round(img.width * ratio);
+            const h = Math.round(img.height * ratio);
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', calidad));
+          };
+          img.onerror = () => reject(new Error('No se pudo leer la imagen'));
+          img.src = ev.target.result;
+        };
+        lector.onerror = () => reject(new Error('No se pudo leer el archivo'));
+        lector.readAsDataURL(file);
+      });
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const conUid = params.get('con');
+
+    if (!conUid) {
+      window.location.href = 'chats.html';
+    }
+
+    document.getElementById('link-volver').href = `chat.html?con=${encodeURIComponent(conUid)}`;
+
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        window.location.href = 'registro.html';
+        return;
+      }
+      const miUid = user.uid;
+      if (conUid === miUid) {
+        window.location.href = 'chats.html';
+        return;
+      }
+
+      const amistadDoc = await db.collection('usuarios').doc(miUid).collection('amigos').doc(conUid).get();
+      if (!amistadDoc.exists) {
+        window.location.href = 'chats.html';
+        return;
+      }
+
+      const perfilDoc = await db.collection('usuarios').doc(conUid).get();
+      const nombreOtro = perfilDoc.exists ? (perfilDoc.data().nombre || 'Sin nombre') : 'Sin nombre';
+      document.getElementById('sub-nombre').textContent = `Contigo y ${nombreOtro}`;
+
+      const chatId = chatIdPara(miUid, conUid);
+      const albumRef = db.collection('albumes').doc(chatId);
+      await albumRef.set({ participantes: [miUid, conUid] }, { merge: true });
+
+      const grid = document.getElementById('grid-fotos');
+
+      albumRef.collection('fotos').orderBy('creadoEn', 'desc').onSnapshot((snap) => {
+        if (snap.empty) {
+          grid.innerHTML = '<div class="empty-state" style="grid-column: 1 / -1;">Todavía no hay fotos. Suban la primera de su próximo ride juntos 📸</div>';
+          return;
+        }
+        grid.innerHTML = snap.docs.map((d) => {
+          const f = d.data();
+          return `<div class="foto"><img src="${f.fotoURL}" alt="Foto del álbum"></div>`;
+        }).join('');
+      });
+
+      const btnSubir = document.getElementById('btn-subir');
+      const fotoInput = document.getElementById('foto-input');
+      btnSubir.addEventListener('click', () => fotoInput.click());
+
+      fotoInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        btnSubir.disabled = true;
+        btnSubir.textContent = 'Subiendo...';
+
+        try {
+          const dataUrl = await comprimirImagen(file, 480, 480, 0.75);
+          await albumRef.collection('fotos').add({
+            de: miUid,
+            fotoURL: dataUrl,
+            creadoEn: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        } catch (err) {
+          alert('No se pudo subir la foto. Intenta con otra imagen.');
+        }
+
+        btnSubir.disabled = false;
+        btnSubir.textContent = '+ Subir foto';
+        fotoInput.value = '';
+      });
+    });
+  </script>
+</body>
+</html>

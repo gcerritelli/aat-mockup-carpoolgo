@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ride — CarpoolGo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; color: #1b2a22; background: #dfe7e2; }
+
+  .phone { max-width: 440px; margin: 0 auto; min-height: 100vh; background: #f4f9f5; box-shadow: 0 0 50px rgba(16, 50, 31, 0.12); }
+
+  .topbar {
+    background: #10321f; color: #ffffff; padding: 18px 22px;
+    position: sticky; top: 0; display: flex; align-items: center; gap: 14px;
+  }
+  .topbar a.back { color: #d9ecd9; text-decoration: none; font-size: 20px; }
+  .topbar .titulo { font-size: 18px; font-weight: 700; }
+
+  main { padding: 20px; }
+  .card { background: #ffffff; border-radius: 14px; padding: 18px 20px; box-shadow: 0 6px 18px rgba(16, 50, 31, 0.08); margin-bottom: 18px; }
+  h2 { font-size: 14px; color: #10321f; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.4px; }
+  .card p { font-size: 14px; color: #445248; line-height: 1.5; }
+
+  .avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: #4fd18b; color: #0d2416;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; flex-shrink: 0; overflow: hidden;
+  }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .participante-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
+  .participante-row .name { font-size: 14px; font-weight: 600; color: #10321f; }
+  .participante-row .tag { font-size: 12px; color: #6b7d70; }
+
+  label { display: block; font-size: 14px; font-weight: 600; color: #2b3c31; margin-bottom: 6px; margin-top: 14px; }
+  label:first-of-type { margin-top: 0; }
+  input[type="text"], input[type="number"] {
+    width: 100%; padding: 12px 14px; border: 1px solid #cfe0d4; border-radius: 8px;
+    font-size: 15px; font-family: inherit; color: #1b2a22;
+  }
+  input:focus { outline: 2px solid #4fd18b; border-color: transparent; }
+  .hint { font-size: 12px; color: #6b7d70; margin-top: 6px; }
+
+  button.accion {
+    width: 100%; background: #4fd18b; color: #0d2416; border: none;
+    padding: 14px; font-size: 15px; font-weight: 700; border-radius: 26px; cursor: pointer; margin-top: 16px;
+  }
+  button.accion:hover { background: #3fc07c; }
+  button.accion:disabled { opacity: 0.6; cursor: wait; }
+  button.rechazar-btn {
+    width: 100%; background: none; border: 1px solid #e0b4b4; color: #9c2f2f;
+    padding: 12px; border-radius: 26px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 10px;
+  }
+
+  .costo-total { font-size: 28px; font-weight: 700; color: #10321f; margin-bottom: 4px; }
+  .costo-nota { font-size: 12px; color: #93a69a; margin-bottom: 16px; }
+  .deuda-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 0; border-bottom: 1px solid #eef4ef;
+  }
+  .deuda-row:last-child { border-bottom: none; }
+  .deuda-row .monto { font-weight: 700; color: #10321f; }
+
+  .empty-mini { font-size: 13px; color: #93a69a; }
+</style>
+</head>
+<body>
+
+  <div class="phone">
+    <div class="topbar">
+      <a class="back" href="app.html">←</a>
+      <div class="titulo">Detalle del Ride</div>
+    </div>
+    <main id="contenido">
+      <p class="empty-mini">Cargando...</p>
+    </main>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBM9QJkGNsOP_6gqwKFagrFLrTDmkloboM",
+      authDomain: "carpoolgo-b7728.firebaseapp.com",
+      projectId: "carpoolgo-b7728",
+      storageBucket: "carpoolgo-b7728.firebasestorage.app",
+      messagingSenderId: "133384054341",
+      appId: "1:133384054341:web:f8ef0cdfaafbbe9ebf652c"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    const COSTO_POR_KM = 2.5; // estimado de gasolina en MXN por km, no calculado con GPS real
+
+    function escapeHtml(texto) {
+      const div = document.createElement('div');
+      div.textContent = texto == null ? '' : String(texto);
+      return div.innerHTML;
+    }
+    function inicial(nombre) {
+      return (nombre || '?').trim().charAt(0).toUpperCase();
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const rideId = params.get('id');
+    if (!rideId) window.location.href = 'app.html';
+
+    const cont = document.getElementById('contenido');
+
+    async function cargarPerfiles(uids) {
+      const docs = await Promise.all(uids.map((id) => db.collection('usuarios').doc(id).get()));
+      const mapa = {};
+      docs.forEach((d, i) => { mapa[uids[i]] = d.exists ? d.data() : { nombre: 'Sin nombre' }; });
+      return mapa;
+    }
+
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        window.location.href = 'registro.html';
+        return;
+      }
+      const miUid = user.uid;
+
+      const rideDoc = await db.collection('rides').doc(rideId).get();
+      if (!rideDoc.exists) {
+        cont.innerHTML = '<p class="empty-mini">Este ride ya no existe.</p>';
+        return;
+      }
+      const ride = rideDoc.data();
+      if (!ride.participantes.includes(miUid)) {
+        window.location.href = 'app.html';
+        return;
+      }
+
+      const perfiles = await cargarPerfiles(ride.participantes);
+      const esHost = ride.hostUid === miUid;
+      const hostNombre = perfiles[ride.hostUid] ? perfiles[ride.hostUid].nombre : 'el host';
+
+      const listaParticipantesHtml = ride.participantes.map((uid) => {
+        const p = perfiles[uid] || {};
+        const esEsteHost = uid === ride.hostUid;
+        return `
+          <div class="participante-row">
+            <div class="avatar">${p.fotoURL ? `<img src="${p.fotoURL}" alt="">` : escapeHtml(inicial(p.nombre))}</div>
+            <div>
+              <div class="name">${escapeHtml(p.nombre || 'Sin nombre')}${uid === miUid ? ' (tú)' : ''}</div>
+              <div class="tag">${esEsteHost ? 'Host / conductor' : 'Pasajero'}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      if (ride.estado === 'rechazado') {
+        cont.innerHTML = `
+          <div class="card">
+            <h2>Ride rechazado</h2>
+            <p>${escapeHtml(hostNombre)} no pudo aceptar manejar este ride.</p>
+          </div>
+        `;
+        return;
+      }
+
+      if (ride.estado === 'pendiente_host' && esHost) {
+        cont.innerHTML = `
+          <div class="card">
+            <h2>Te invitaron a manejar</h2>
+            <p>${escapeHtml(ride.creadoPorNombre || 'Alguien')} te agregó como host de un ride con estas personas:</p>
+          </div>
+          <div class="card">${listaParticipantesHtml}</div>
+          <div class="card">
+            <button class="accion" id="btn-aceptar">Aceptar y manejar</button>
+            <button class="rechazar-btn" id="btn-rechazar">Rechazar</button>
+          </div>
+        `;
+        document.getElementById('btn-aceptar').addEventListener('click', async () => {
+          await db.collection('rides').doc(rideId).set({ estado: 'activo' }, { merge: true });
+          window.location.reload();
+        });
+        document.getElementById('btn-rechazar').addEventListener('click', async () => {
+          await db.collection('rides').doc(rideId).set({ estado: 'rechazado' }, { merge: true });
+          window.location.reload();
+        });
+        return;
+      }
+
+      if (ride.estado === 'pendiente_host' && !esHost) {
+        cont.innerHTML = `
+          <div class="card">
+            <h2>Esperando al host</h2>
+            <p>Le mandamos la invitación a ${escapeHtml(hostNombre)} para manejar este ride. En cuanto la acepte, vas a poder ver los detalles aquí.</p>
+          </div>
+          <div class="card">${listaParticipantesHtml}</div>
+        `;
+        return;
+      }
+
+      if (ride.estado === 'activo' && esHost) {
+        cont.innerHTML = `
+          <div class="card">${listaParticipantesHtml}</div>
+          <div class="card">
+            <h2>Termina el ride</h2>
+            <p style="margin-bottom:10px;">Captura estos datos al terminar para calcular cuánto se gastó en gasolina y dividirlo entre todos (tú no pagas, solo tus pasajeros).</p>
+            <label for="origen">Origen</label>
+            <input type="text" id="origen" placeholder="De dónde salieron">
+            <label for="destino">Destino</label>
+            <input type="text" id="destino" placeholder="A dónde llegaron">
+            <label for="km">Distancia total (km)</label>
+            <input type="number" id="km" min="1" step="0.1" placeholder="Ej. 12.5">
+            <label for="min">Duración total (minutos)</label>
+            <input type="number" id="min" min="1" placeholder="Ej. 35">
+            <p class="hint">Estimamos el costo con $${COSTO_POR_KM} MXN por km. Es un cálculo aproximado, no viene de GPS.</p>
+            <button class="accion" id="btn-terminar">Calcular y dividir gasto</button>
+            <div class="empty-mini" id="msg-ride-error" style="display:none;color:#9c2f2f;margin-top:8px;"></div>
+          </div>
+        `;
+        document.getElementById('btn-terminar').addEventListener('click', async () => {
+          const km = parseFloat(document.getElementById('km').value);
+          const min = parseFloat(document.getElementById('min').value);
+          const origen = document.getElementById('origen').value.trim();
+          const destino = document.getElementById('destino').value.trim();
+          const errEl = document.getElementById('msg-ride-error');
+
+          if (!km || km <= 0) {
+            errEl.textContent = 'Indica la distancia en kilómetros.';
+            errEl.style.display = 'block';
+            return;
+          }
+
+          const pasajeros = ride.participantes.filter((uid) => uid !== ride.hostUid);
+          const costoTotal = km * COSTO_POR_KM;
+          const montoPorPasajero = pasajeros.length > 0 ? costoTotal / pasajeros.length : 0;
+          const deudas = {};
+          pasajeros.forEach((uid) => { deudas[uid] = montoPorPasajero; });
+
+          const btn = document.getElementById('btn-terminar');
+          btn.disabled = true;
+          btn.textContent = 'Calculando...';
+
+          await db.collection('rides').doc(rideId).set({
+            estado: 'completado',
+            origen: origen || null,
+            destino: destino || null,
+            distanciaKm: km,
+            duracionMin: min || null,
+            costoTotal: costoTotal,
+            deudas: deudas,
+            completadoEn: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+
+          window.location.reload();
+        });
+        return;
+      }
+
+      if (ride.estado === 'activo' && !esHost) {
+        cont.innerHTML = `
+          <div class="card">${listaParticipantesHtml}</div>
+          <div class="card">
+            <h2>Ride en curso</h2>
+            <p>${escapeHtml(hostNombre)} está manejando. Cuando termine el viaje va a capturar los datos aquí mismo y vas a ver cuánto le toca pagar a cada quien.</p>
+          </div>
+        `;
+        return;
+      }
+
+      if (ride.estado === 'completado') {
+        const deudas = ride.deudas || {};
+        let panelDeuda = '';
+        if (esHost) {
+          const filas = Object.keys(deudas).map((uid) => {
+            const p = perfiles[uid] || {};
+            return `
+              <div class="deuda-row">
+                <span>${escapeHtml(p.nombre || 'Alguien')} te debe</span>
+                <span class="monto">$${Math.round(deudas[uid])} MXN</span>
+              </div>
+            `;
+          }).join('');
+          panelDeuda = `<div class="card"><h2>Te deben</h2>${filas || '<p class="empty-mini">Nadie te debe nada en este ride.</p>'}</div>`;
+        } else {
+          const monto = deudas[miUid] || 0;
+          panelDeuda = `
+            <div class="card">
+              <h2>Le debes a ${escapeHtml(hostNombre)}</h2>
+              <div class="deuda-row" style="border:none;padding:0;">
+                <span>Tu parte del gasto de gasolina</span>
+                <span class="monto">$${Math.round(monto)} MXN</span>
+              </div>
+            </div>
+          `;
+        }
+
+        cont.innerHTML = `
+          <div class="card">
+            <h2>Ride completado</h2>
+            <div class="costo-total">$${Math.round(ride.costoTotal || 0)} MXN</div>
+            <div class="costo-nota">${ride.distanciaKm || '—'} km · ${ride.duracionMin || '—'} min · ${escapeHtml(ride.origen || '')}${ride.origen && ride.destino ? ' → ' : ''}${escapeHtml(ride.destino || '')}</div>
+          </div>
+          ${panelDeuda}
+          <div class="card">${listaParticipantesHtml}</div>
+        `;
+        return;
+      }
+
+      cont.innerHTML = '<p class="empty-mini">No pudimos cargar este ride.</p>';
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat — CarpoolGo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; color: #1b2a22; background: #dfe7e2; }
+
+  .phone {
+    max-width: 440px;
+    margin: 0 auto;
+    height: 100vh;
+    background: #f4f9f5;
+    box-shadow: 0 0 50px rgba(16, 50, 31, 0.12);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .topbar {
+    background: #10321f;
+    color: #ffffff;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .topbar a.back { color: #d9ecd9; text-decoration: none; font-size: 20px; }
+  .avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: #4fd18b; color: #0d2416;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 15px; flex-shrink: 0;
+    overflow: hidden;
+  }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .topbar .nombre { font-size: 16px; font-weight: 700; flex: 1; }
+  .btn-album {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: #e63946; color: #ffffff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 19px; text-decoration: none; flex-shrink: 0;
+  }
+
+  .mensajes { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+  .msg { max-width: 75%; padding: 10px 14px; border-radius: 16px; font-size: 14px; line-height: 1.4; word-wrap: break-word; }
+  .msg.mio { align-self: flex-end; background: #4fd18b; color: #0d2416; border-bottom-right-radius: 4px; }
+  .msg.suyo { align-self: flex-start; background: #ffffff; color: #1b2a22; border-bottom-left-radius: 4px; box-shadow: 0 2px 8px rgba(16,50,31,0.06); }
+  .empty-state { text-align: center; padding: 40px 24px; color: #6b7d70; font-size: 14px; margin: auto; }
+
+  form.enviar {
+    display: flex;
+    gap: 10px;
+    padding: 12px;
+    background: #ffffff;
+    border-top: 1px solid #dde8e1;
+    flex-shrink: 0;
+  }
+  form.enviar input {
+    flex: 1;
+    padding: 12px 14px;
+    border: 1px solid #cfe0d4;
+    border-radius: 24px;
+    font-size: 14px;
+    font-family: inherit;
+  }
+  form.enviar input:focus { outline: 2px solid #4fd18b; border-color: transparent; }
+  form.enviar button {
+    background: #4fd18b;
+    color: #0d2416;
+    border: none;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+  <div class="phone">
+    <div class="topbar">
+      <a class="back" href="chats.html">←</a>
+      <div class="avatar" id="avatar-otro">?</div>
+      <div class="nombre" id="nombre-otro">Cargando...</div>
+      <a class="btn-album" id="link-album" href="#" title="Álbum compartido">🚗</a>
+    </div>
+    <div class="mensajes" id="mensajes">
+      <div class="empty-state">Cargando conversación...</div>
+    </div>
+    <form class="enviar" id="form-enviar">
+      <input type="text" id="input-mensaje" placeholder="Escribe un mensaje..." autocomplete="off" required>
+      <button type="submit">➤</button>
+    </form>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBM9QJkGNsOP_6gqwKFagrFLrTDmkloboM",
+      authDomain: "carpoolgo-b7728.firebaseapp.com",
+      projectId: "carpoolgo-b7728",
+      storageBucket: "carpoolgo-b7728.firebasestorage.app",
+      messagingSenderId: "133384054341",
+      appId: "1:133384054341:web:f8ef0cdfaafbbe9ebf652c"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    function escapeHtml(texto) {
+      const div = document.createElement('div');
+      div.textContent = texto == null ? '' : String(texto);
+      return div.innerHTML;
+    }
+
+    function inicial(nombre) {
+      return (nombre || '?').trim().charAt(0).toUpperCase();
+    }
+
+    function chatIdPara(a, b) {
+      return [a, b].sort().join('_');
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const conUid = params.get('con');
+
+    if (!conUid) {
+      window.location.href = 'chats.html';
+    }
+
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        window.location.href = 'registro.html';
+        return;
+      }
+      const miUid = user.uid;
+      if (conUid === miUid) {
+        window.location.href = 'chats.html';
+        return;
+      }
+
+      const amistadDoc = await db.collection('usuarios').doc(miUid).collection('amigos').doc(conUid).get();
+      if (!amistadDoc.exists) {
+        window.location.href = 'chats.html';
+        return;
+      }
+
+      const perfilDoc = await db.collection('usuarios').doc(conUid).get();
+      const perfil = perfilDoc.exists ? perfilDoc.data() : {};
+      const nombreOtro = perfil.nombre || 'Sin nombre';
+
+      document.getElementById('nombre-otro').textContent = nombreOtro;
+      const avatarEl = document.getElementById('avatar-otro');
+      if (perfil.fotoURL) {
+        avatarEl.innerHTML = `<img src="${perfil.fotoURL}" alt="">`;
+      } else {
+        avatarEl.textContent = inicial(nombreOtro);
+      }
+      document.getElementById('link-album').href = `album.html?con=${encodeURIComponent(conUid)}`;
+
+      const chatId = chatIdPara(miUid, conUid);
+      const chatRef = db.collection('chats').doc(chatId);
+      await chatRef.set({ participantes: [miUid, conUid] }, { merge: true });
+
+      const mensajesEl = document.getElementById('mensajes');
+
+      chatRef.collection('mensajes').orderBy('creadoEn', 'asc').onSnapshot((snap) => {
+        if (snap.empty) {
+          mensajesEl.innerHTML = '<div class="empty-state">Todavía no hay mensajes. ¡Di hola! 👋</div>';
+          return;
+        }
+        mensajesEl.innerHTML = snap.docs.map((d) => {
+          const m = d.data();
+          const esMio = m.de === miUid;
+          return `<div class="msg ${esMio ? 'mio' : 'suyo'}">${escapeHtml(m.texto)}</div>`;
+        }).join('');
+        mensajesEl.scrollTop = mensajesEl.scrollHeight;
+      });
+
+      document.getElementById('form-enviar').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const input = document.getElementById('input-mensaje');
+        const texto = input.value.trim();
+        if (!texto) return;
+        input.value = '';
+
+        await chatRef.collection('mensajes').add({
+          de: miUid,
+          texto: texto,
+          creadoEn: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        await chatRef.set({
+          ultimoMensaje: texto,
+          ultimoEn: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+      });
+    });
+  </script>
+</body>
+</html>

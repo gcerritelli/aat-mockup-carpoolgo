@@ -115,6 +115,46 @@
     background: #ffffff;
     margin-bottom: 18px;
   }
+  .buscador-uni { position: relative; margin-bottom: 18px; }
+  input.filtro {
+    width: 100%;
+    padding: 12px 40px 12px 14px;
+    border: 1px solid #cfe0d4;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    color: #1b2a22;
+    background: #ffffff;
+  }
+  input.filtro:focus { outline: 2px solid #4fd18b; border-color: transparent; }
+  #btn-limpiar-uni {
+    position: absolute;
+    right: 10px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; color: #93a69a;
+    font-size: 16px; cursor: pointer; padding: 4px;
+  }
+  .sugerencias {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    background: #ffffff;
+    border: 1px solid #dde8e1;
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(16, 50, 31, 0.12);
+    max-height: 240px;
+    overflow-y: auto;
+    z-index: 20;
+    display: none;
+  }
+  .sugerencias.show { display: block; }
+  .sugerencia-item {
+    padding: 11px 14px;
+    font-size: 14px;
+    color: #1b2a22;
+    cursor: pointer;
+  }
+  .sugerencia-item:hover, .sugerencia-item.activa { background: #e3f6ea; }
+  .sugerencia-item + .sugerencia-item { border-top: 1px solid #f0f5f1; }
   .user-card {
     background: #ffffff;
     border-radius: 14px;
@@ -164,6 +204,27 @@
   .solicitud-row .who, .amigo-row .who { display: flex; align-items: center; gap: 10px; }
   .solicitud-row .name, .amigo-row .name { font-size: 14px; font-weight: 600; color: #10321f; }
   .empty-mini { font-size: 13px; color: #93a69a; }
+
+  .ride-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 0;
+    border-bottom: 1px solid #eef4ef;
+    text-decoration: none;
+    color: inherit;
+  }
+  .ride-row:last-child { border-bottom: none; }
+  .ride-row .titulo { font-size: 14px; font-weight: 600; color: #10321f; }
+  .ride-row .sub { font-size: 12px; color: #6b7d70; margin-top: 2px; }
+  .ride-estado {
+    font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 12px; flex-shrink: 0;
+  }
+  .ride-estado.pendiente_host { background: #fff3cd; color: #8a6d00; }
+  .ride-estado.activo { background: #d6e9ff; color: #0d4a8a; }
+  .ride-estado.completado { background: #e3f6ea; color: #10321f; }
+  .ride-estado.rechazado { background: #fde8e8; color: #9c2f2f; }
   .avatar.avatar-sm { width: 34px; height: 34px; font-size: 13px; }
 
   textarea {
@@ -179,7 +240,7 @@
   }
   textarea:focus { outline: 2px solid #4fd18b; border-color: transparent; }
 
-  button.save {
+  button.save, a.save {
     margin-top: 10px;
     background: #4fd18b;
     color: #0d2416;
@@ -190,11 +251,32 @@
     border-radius: 24px;
     cursor: pointer;
   }
-  button.save:hover { background: #3fc07c; }
+  button.save:hover, a.save:hover { background: #3fc07c; }
   button.save:disabled { opacity: 0.6; cursor: wait; }
 
   .save-msg { font-size: 13px; color: #10321f; margin-top: 8px; display: none; }
   .save-msg.show { display: block; }
+
+  .fab-wrap {
+    position: fixed;
+    bottom: 78px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 16;
+  }
+  .fab {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: #e63946;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    text-decoration: none;
+    box-shadow: 0 8px 20px rgba(230, 57, 70, 0.4);
+  }
 
   button.logout {
     width: 100%;
@@ -264,9 +346,11 @@
     </div>
 
     <div class="view" id="view-buscar">
-      <select class="filtro" id="filtro-universidad">
-        <option value="">Todas las universidades</option>
-      </select>
+      <div class="buscador-uni">
+        <input type="text" id="input-universidad" class="filtro" placeholder="Busca tu universidad..." autocomplete="off">
+        <button id="btn-limpiar-uni" style="display:none;">✕</button>
+        <div id="sugerencias-universidad" class="sugerencias"></div>
+      </div>
       <div id="resultados-buscar">
         <div class="empty-state">Cargando otros usuarios...</div>
       </div>
@@ -322,6 +406,22 @@
         <div class="row"><span>Rol</span><span id="rol-perfil">—</span></div>
       </div>
 
+      <div class="card">
+        <h2>Organiza un ride</h2>
+        <p style="font-size:14px;color:#445248;margin-bottom:12px;">Junta a tus amigos, elige quién maneja, y al final dividimos el gasto de gasolina entre todos.</p>
+        <a class="save" style="display:block;text-align:center;text-decoration:none;" href="crear-ride.html">Start a Ride</a>
+      </div>
+
+      <div class="card" id="card-invitaciones-ride" style="display:none;">
+        <h2>Invitaciones de ride</h2>
+        <div id="lista-invitaciones-ride"></div>
+      </div>
+
+      <div class="card" id="card-mis-rides">
+        <h2>Tus rides</h2>
+        <div id="lista-mis-rides"><p class="empty-mini">Cargando...</p></div>
+      </div>
+
       <div class="card" id="card-trayecto">
         <h2>Tu trayecto</h2>
         <p id="trayecto-perfil">Todavía no has registrado un trayecto.</p>
@@ -350,6 +450,10 @@
       <div class="save-msg" id="save-msg">Guardado ✓</div>
 
       <button class="logout" id="btn-logout">Cerrar sesión</button>
+    </div>
+
+    <div class="fab-wrap">
+      <a class="fab" href="chats.html" title="Chats">🚗</a>
     </div>
   </div>
 
@@ -602,6 +706,7 @@
       }
 
       relacionesPromise = cargarRelaciones(uid);
+      cargarRides(uid);
 
       document.getElementById('loading').style.display = 'none';
       mostrarTab('home');
@@ -637,6 +742,7 @@
     });
 
     let otrosUsuarios = [];
+    let filtroUniversidadActual = '';
 
     async function cargarBusqueda() {
       const contenedor = document.getElementById('resultados-buscar');
@@ -655,15 +761,6 @@
           return { id: doc.id, ...datos, trayecto };
         }));
 
-        const universidades = [...new Set(otrosUsuarios.map((u) => u.universidad).filter(Boolean))].sort();
-        const select = document.getElementById('filtro-universidad');
-        universidades.forEach((uni) => {
-          const opt = document.createElement('option');
-          opt.value = uni;
-          opt.textContent = uni;
-          select.appendChild(opt);
-        });
-
         renderResultados();
       } catch (err) {
         contenedor.innerHTML = '<div class="empty-state">No pudimos cargar otros usuarios. Intenta de nuevo más tarde.</div>';
@@ -672,12 +769,12 @@
 
     function renderResultados() {
       const contenedor = document.getElementById('resultados-buscar');
-      const filtroUni = document.getElementById('filtro-universidad').value;
-
-      const lista = otrosUsuarios.filter((u) => !filtroUni || u.universidad === filtroUni);
+      const lista = otrosUsuarios.filter((u) => !filtroUniversidadActual || u.universidad === filtroUniversidadActual);
 
       if (lista.length === 0) {
-        contenedor.innerHTML = '<div class="empty-state">Todavía no hay más usuarios que coincidan. Invita a tus compañeros a registrarse en CarpoolGo.</div>';
+        contenedor.innerHTML = filtroUniversidadActual
+          ? `<div class="empty-state">Disculpa, por el momento todavía no tenemos a nadie que se encuentre en ${escapeHtml(filtroUniversidadActual)}.</div>`
+          : '<div class="empty-state">Todavía no hay más usuarios que coincidan. Invita a tus compañeros a registrarse en CarpoolGo.</div>';
         return;
       }
 
@@ -711,7 +808,67 @@
       }).join('');
     }
 
-    document.getElementById('filtro-universidad').addEventListener('change', renderResultados);
+    const todasLasUniversidades = Object.values(universidadesPorEstado).flat().sort();
+
+    const inputUniversidad = document.getElementById('input-universidad');
+    const sugerenciasUniversidad = document.getElementById('sugerencias-universidad');
+    const btnLimpiarUni = document.getElementById('btn-limpiar-uni');
+
+    function mostrarSugerencias(texto) {
+      const q = texto.trim().toLowerCase();
+      if (!q) {
+        sugerenciasUniversidad.classList.remove('show');
+        sugerenciasUniversidad.innerHTML = '';
+        return;
+      }
+      const coincidencias = todasLasUniversidades.filter((u) => u.toLowerCase().includes(q)).slice(0, 8);
+      if (coincidencias.length === 0) {
+        sugerenciasUniversidad.innerHTML = '<div class="sugerencia-item" style="color:#93a69a;cursor:default;">Sin coincidencias</div>';
+      } else {
+        sugerenciasUniversidad.innerHTML = coincidencias.map((u) =>
+          `<div class="sugerencia-item" data-uni="${escapeHtml(u)}">${escapeHtml(u)}</div>`
+        ).join('');
+      }
+      sugerenciasUniversidad.classList.add('show');
+    }
+
+    inputUniversidad.addEventListener('input', () => {
+      mostrarSugerencias(inputUniversidad.value);
+      if (!inputUniversidad.value.trim()) {
+        filtroUniversidadActual = '';
+        btnLimpiarUni.style.display = 'none';
+        renderResultados();
+      }
+    });
+
+    inputUniversidad.addEventListener('focus', () => {
+      if (inputUniversidad.value.trim()) mostrarSugerencias(inputUniversidad.value);
+    });
+
+    sugerenciasUniversidad.addEventListener('click', (e) => {
+      const item = e.target.closest('.sugerencia-item[data-uni]');
+      if (!item) return;
+      const uni = item.dataset.uni;
+      inputUniversidad.value = uni;
+      filtroUniversidadActual = uni;
+      btnLimpiarUni.style.display = 'block';
+      sugerenciasUniversidad.classList.remove('show');
+      renderResultados();
+    });
+
+    btnLimpiarUni.addEventListener('click', () => {
+      inputUniversidad.value = '';
+      filtroUniversidadActual = '';
+      btnLimpiarUni.style.display = 'none';
+      sugerenciasUniversidad.classList.remove('show');
+      renderResultados();
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.buscador-uni')) {
+        sugerenciasUniversidad.classList.remove('show');
+      }
+    });
 
     let miPerfil = { nombre: '', fotoURL: null };
     let relacionesPromise = null;
@@ -988,6 +1145,76 @@
         setTimeout(() => { msg.style.display = 'none'; }, 2000);
       } catch (err) {
         msg.textContent = 'No se pudo subir la foto. Intenta con otra imagen.';
+      }
+    });
+
+    function estadoRideLabel(estado) {
+      return { pendiente_host: 'Pendiente', activo: 'En curso', completado: 'Listo', rechazado: 'Rechazado' }[estado] || estado;
+    }
+
+    async function cargarRides(uid) {
+      const snap = await db.collection('rides').where('participantes', 'array-contains', uid).get();
+      const rides = snap.docs
+        .map((d) => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => (b.creadoEn ? b.creadoEn.toMillis() : 0) - (a.creadoEn ? a.creadoEn.toMillis() : 0));
+
+      const invitaciones = rides.filter((r) => r.estado === 'pendiente_host' && r.hostUid === uid);
+      const cardInv = document.getElementById('card-invitaciones-ride');
+      const listaInv = document.getElementById('lista-invitaciones-ride');
+      if (invitaciones.length > 0) {
+        cardInv.style.display = 'block';
+        listaInv.innerHTML = invitaciones.map((r) => `
+          <div class="ride-row">
+            <div>
+              <div class="titulo">Te invitaron a manejar un ride</div>
+              <div class="sub">${(r.participantes.length - 1)} persona(s) más · organizado por ${escapeHtml(r.creadoPorNombre || 'alguien')}</div>
+            </div>
+            <div>
+              <button class="btn-mini agregar" data-accion="aceptar-ride" data-id="${r.id}">Aceptar</button>
+              <button class="btn-mini rechazar" data-accion="rechazar-ride" data-id="${r.id}">Rechazar</button>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        cardInv.style.display = 'none';
+      }
+
+      const contLista = document.getElementById('lista-mis-rides');
+      if (rides.length === 0) {
+        contLista.innerHTML = '<p class="empty-mini">Todavía no has organizado ni te han invitado a un ride.</p>';
+        return;
+      }
+      contLista.innerHTML = rides.map((r) => {
+        const esHost = r.hostUid === uid;
+        const sub = r.estado === 'completado'
+          ? `$${Math.round(r.costoTotal || 0)} MXN en total`
+          : (r.estado === 'pendiente_host' ? 'Esperando que el host acepte' : `${r.participantes.length} personas en el ride`);
+        return `
+          <a class="ride-row" href="ride.html?id=${r.id}">
+            <div>
+              <div class="titulo">${esHost ? 'Tú manejas' : 'Ride con amigos'}</div>
+              <div class="sub">${sub}</div>
+            </div>
+            <span class="ride-estado ${r.estado}">${estadoRideLabel(r.estado)}</span>
+          </a>
+        `;
+      }).join('');
+    }
+
+    document.getElementById('lista-invitaciones-ride').addEventListener('click', async (e) => {
+      const btn = e.target.closest('button[data-accion]');
+      if (!btn) return;
+      const rideId = btn.dataset.id;
+      const uid = auth.currentUser && auth.currentUser.uid;
+      if (!uid) return;
+
+      btn.disabled = true;
+      if (btn.dataset.accion === 'aceptar-ride') {
+        await db.collection('rides').doc(rideId).set({ estado: 'activo' }, { merge: true });
+        window.location.href = `ride.html?id=${rideId}`;
+      } else if (btn.dataset.accion === 'rechazar-ride') {
+        await db.collection('rides').doc(rideId).set({ estado: 'rechazado' }, { merge: true });
+        cargarRides(uid);
       }
     });
   </script>

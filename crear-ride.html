@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nuevo Ride — CarpoolGo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; color: #1b2a22; background: #dfe7e2; }
+
+  .phone { max-width: 440px; margin: 0 auto; min-height: 100vh; background: #f4f9f5; box-shadow: 0 0 50px rgba(16, 50, 31, 0.12); }
+
+  .topbar {
+    background: #10321f; color: #ffffff; padding: 18px 22px;
+    position: sticky; top: 0; display: flex; align-items: center; gap: 14px;
+  }
+  .topbar a.back { color: #d9ecd9; text-decoration: none; font-size: 20px; }
+  .topbar .titulo { font-size: 18px; font-weight: 700; }
+
+  main { padding: 20px; }
+  .intro { font-size: 14px; color: #445248; margin-bottom: 22px; line-height: 1.5; }
+  h2 { font-size: 14px; color: #10321f; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.4px; }
+
+  .card { background: #ffffff; border-radius: 14px; padding: 18px 20px; box-shadow: 0 6px 18px rgba(16, 50, 31, 0.08); margin-bottom: 18px; }
+
+  .amigo-check {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 0; border-bottom: 1px solid #eef4ef; cursor: pointer;
+  }
+  .amigo-check:last-child { border-bottom: none; }
+  .amigo-check input { width: 18px; height: 18px; flex-shrink: 0; }
+  .avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: #4fd18b; color: #0d2416;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px; flex-shrink: 0; overflow: hidden;
+  }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .amigo-check .name { font-size: 14px; font-weight: 600; color: #10321f; }
+
+  .host-option {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 0; border-bottom: 1px solid #eef4ef;
+  }
+  .host-option:last-child { border-bottom: none; }
+  .host-option input { width: 18px; height: 18px; flex-shrink: 0; }
+  .host-option .name { font-size: 14px; font-weight: 600; color: #10321f; }
+
+  .empty-mini { font-size: 13px; color: #93a69a; }
+
+  button.crear {
+    width: 100%; background: #4fd18b; color: #0d2416; border: none;
+    padding: 15px; font-size: 16px; font-weight: 700; border-radius: 30px; cursor: pointer;
+  }
+  button.crear:hover { background: #3fc07c; }
+  button.crear:disabled { opacity: 0.6; cursor: wait; }
+
+  .msg { margin-top: 14px; padding: 12px 16px; border-radius: 8px; font-size: 14px; display: none; }
+  .msg.show { display: block; }
+  .msg.success { background: #e3f6ea; color: #10321f; }
+  .msg.error { background: #fde8e8; color: #9c2f2f; }
+</style>
+</head>
+<body>
+
+  <div class="phone">
+    <div class="topbar">
+      <a class="back" href="app.html">←</a>
+      <div class="titulo">Start a Ride</div>
+    </div>
+    <main>
+      <p class="intro">Elige quiénes van en el ride y quién va a manejar (el host). Si eliges a alguien más como host, le va a llegar una invitación que tiene que aceptar.</p>
+
+      <div class="card">
+        <h2>¿Quién va?</h2>
+        <div id="lista-amigos-check"><p class="empty-mini">Cargando amigos...</p></div>
+      </div>
+
+      <div class="card">
+        <h2>¿Quién maneja? (host)</h2>
+        <div id="lista-host"><p class="empty-mini">Selecciona a alguien de la lista de arriba primero.</p></div>
+      </div>
+
+      <button class="crear" id="btn-crear">Crear Ride</button>
+      <div class="msg success" id="msg-success"></div>
+      <div class="msg error" id="msg-error"></div>
+    </main>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBM9QJkGNsOP_6gqwKFagrFLrTDmkloboM",
+      authDomain: "carpoolgo-b7728.firebaseapp.com",
+      projectId: "carpoolgo-b7728",
+      storageBucket: "carpoolgo-b7728.firebasestorage.app",
+      messagingSenderId: "133384054341",
+      appId: "1:133384054341:web:f8ef0cdfaafbbe9ebf652c"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    function escapeHtml(texto) {
+      const div = document.createElement('div');
+      div.textContent = texto == null ? '' : String(texto);
+      return div.innerHTML;
+    }
+    function inicial(nombre) {
+      return (nombre || '?').trim().charAt(0).toUpperCase();
+    }
+
+    let miUid = null;
+    let miNombre = '';
+    let amigos = [];
+
+    function renderHostOptions() {
+      const seleccionados = amigos.filter((a) => document.getElementById(`chk-${a.id}`).checked);
+      const cont = document.getElementById('lista-host');
+
+      const opciones = [{ id: miUid, nombre: `${miNombre} (tú)`, fotoURL: null }, ...seleccionados];
+      cont.innerHTML = opciones.map((o, i) => `
+        <label class="host-option">
+          <input type="radio" name="host" value="${escapeHtml(o.id)}" ${i === 0 ? 'checked' : ''}>
+          <div class="avatar">${o.fotoURL ? `<img src="${o.fotoURL}" alt="">` : escapeHtml(inicial(o.nombre))}</div>
+          <span class="name">${escapeHtml(o.nombre)}</span>
+        </label>
+      `).join('');
+    }
+
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        window.location.href = 'registro.html';
+        return;
+      }
+      miUid = user.uid;
+
+      const miDoc = await db.collection('usuarios').doc(miUid).get();
+      miNombre = miDoc.exists ? (miDoc.data().nombre || 'Tú') : 'Tú';
+
+      const amigosSnap = await db.collection('usuarios').doc(miUid).collection('amigos').get();
+      if (amigosSnap.empty) {
+        document.getElementById('lista-amigos-check').innerHTML = '<p class="empty-mini">Todavía no tienes amigos agregados. Ve a Buscar para agregar compañeros.</p>';
+        renderHostOptions();
+        return;
+      }
+
+      amigos = await Promise.all(amigosSnap.docs.map(async (d) => {
+        const amistad = d.data();
+        const perfilDoc = await db.collection('usuarios').doc(d.id).get();
+        const perfil = perfilDoc.exists ? perfilDoc.data() : {};
+        return { id: d.id, nombre: amistad.nombre, fotoURL: perfil.fotoURL || null };
+      }));
+
+      document.getElementById('lista-amigos-check').innerHTML = amigos.map((a) => `
+        <label class="amigo-check">
+          <input type="checkbox" id="chk-${escapeHtml(a.id)}" data-uid="${escapeHtml(a.id)}">
+          <div class="avatar">${a.fotoURL ? `<img src="${a.fotoURL}" alt="">` : escapeHtml(inicial(a.nombre))}</div>
+          <span class="name">${escapeHtml(a.nombre || 'Sin nombre')}</span>
+        </label>
+      `).join('');
+
+      document.querySelectorAll('#lista-amigos-check input[type="checkbox"]').forEach((chk) => {
+        chk.addEventListener('change', renderHostOptions);
+      });
+
+      renderHostOptions();
+    });
+
+    document.getElementById('btn-crear').addEventListener('click', async () => {
+      const btn = document.getElementById('btn-crear');
+      const msgError = document.getElementById('msg-error');
+      const msgSuccess = document.getElementById('msg-success');
+      msgError.classList.remove('show');
+      msgSuccess.classList.remove('show');
+
+      const seleccionados = amigos.filter((a) => document.getElementById(`chk-${a.id}`) && document.getElementById(`chk-${a.id}`).checked);
+      if (seleccionados.length === 0) {
+        msgError.textContent = 'Elige por lo menos a un amigo para el ride.';
+        msgError.classList.add('show');
+        return;
+      }
+
+      const hostInput = document.querySelector('input[name="host"]:checked');
+      const hostUid = hostInput ? hostInput.value : miUid;
+      const participantes = [miUid, ...seleccionados.map((a) => a.id)];
+
+      btn.disabled = true;
+      btn.textContent = 'Creando...';
+
+      const esHostYo = hostUid === miUid;
+      const rideRef = await db.collection('rides').add({
+        creadoPor: miUid,
+        creadoPorNombre: miNombre,
+        hostUid: hostUid,
+        participantes: participantes,
+        estado: esHostYo ? 'activo' : 'pendiente_host',
+        distanciaKm: null,
+        duracionMin: null,
+        costoTotal: null,
+        creadoEn: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      if (esHostYo) {
+        window.location.href = `ride.html?id=${rideRef.id}`;
+      } else {
+        const hostNombre = seleccionados.find((a) => a.id === hostUid);
+        msgSuccess.textContent = `¡Listo! Le mandamos la invitación a ${hostNombre ? hostNombre.nombre : 'tu amigo'} para que acepte manejar.`;
+        msgSuccess.classList.add('show');
+        btn.textContent = 'Crear Ride';
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
