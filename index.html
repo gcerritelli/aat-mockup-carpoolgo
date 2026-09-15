@@ -51,6 +51,8 @@
     transition: transform 0.15s, background 0.2s;
   }
   .hero .btn:hover { background: #3fc07c; transform: translateY(-2px); }
+  .hero-illustration { margin-top: 40px; }
+  .hero-illustration svg { display: block; margin: 0 auto; width: 100%; max-width: 360px; height: auto; }
 
   .cards {
     padding: 80px 20px;
@@ -129,26 +131,52 @@
     <h1>Comparte tu ruta diaria, no tu tráfico</h1>
     <p>CarpoolGo conecta a personas que hacen trayectos similares al trabajo o la escuela para que organicen carpool, ahorren gasolina y reduzcan sus emisiones de carbono.</p>
     <a class="btn" href="registro.html">Encuentra tu Carpool</a>
+    <div class="hero-illustration">
+      <svg viewBox="0 0 400 220" xmlns="http://www.w3.org/2000/svg">
+        <path d="M40,170 C120,60 260,190 360,50" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="4" stroke-dasharray="2 12" stroke-linecap="round"/>
+        <circle cx="40" cy="170" r="9" fill="#4fd18b"/>
+        <circle cx="40" cy="170" r="16" fill="none" stroke="#4fd18b" stroke-opacity="0.35" stroke-width="3"/>
+        <circle cx="360" cy="50" r="9" fill="#4fd18b"/>
+        <circle cx="360" cy="50" r="16" fill="none" stroke="#4fd18b" stroke-opacity="0.35" stroke-width="3"/>
+        <g transform="translate(195,118) rotate(-18)">
+          <rect x="-30" y="-14" width="60" height="26" rx="10" fill="#ffffff"/>
+          <rect x="-16" y="-24" width="34" height="16" rx="6" fill="#ffffff"/>
+          <circle cx="-16" cy="14" r="8" fill="#10321f"/>
+          <circle cx="16" cy="14" r="8" fill="#10321f"/>
+        </g>
+        <g transform="translate(40,128)">
+          <circle cx="0" cy="0" r="11" fill="#ffffff"/>
+          <path d="M-14,26 C-14,10 14,10 14,26 Z" fill="#ffffff"/>
+        </g>
+        <g transform="translate(360,8)">
+          <circle cx="0" cy="0" r="11" fill="#ffffff"/>
+          <path d="M-14,26 C-14,10 14,10 14,26 Z" fill="#ffffff"/>
+        </g>
+      </svg>
+    </div>
   </section>
 
   <section class="cards" id="como-funciona">
     <h2>Cómo Funciona</h2>
     <div class="card-grid">
-      <div class="card">
+      <a class="card" href="trayecto.html" target="_blank">
         <span class="stat">2 minutos</span>
         <h3>Registra tu Trayecto</h3>
         <p>Indica tu punto de partida, tu destino y tus horarios habituales de ida al trabajo o la escuela.</p>
-      </div>
-      <div class="card">
+        <span class="link-hint">Ver qué datos te pedimos →</span>
+      </a>
+      <a class="card" href="match.html" target="_blank">
         <span class="stat">Match inteligente</span>
         <h3>Encuentra Compañeros de Ruta</h3>
         <p>Te conectamos con personas cercanas que recorren un camino muy similar al tuyo, en horarios compatibles.</p>
-      </div>
-      <div class="card">
+        <span class="link-hint">Ver cómo funciona el match →</span>
+      </a>
+      <a class="card" href="ahorro.html" target="_blank">
         <span class="stat">Costo compartido</span>
         <h3>Organiza y Ahorra</h3>
         <p>Coordinen quién maneja cada día y dividan el gasto de gasolina entre todos, en vez de pagarlo solos.</p>
-      </div>
+        <span class="link-hint">Ver cómo se organiza el grupo →</span>
+      </a>
       <a class="card" href="seguridad.html" target="_blank">
         <span class="stat">100% verificados</span>
         <h3>Viaja con Confianza</h3>

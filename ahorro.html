@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Organiza y Ahorra — CarpoolGo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; color: #1b2a22; background: #f4f9f5; }
+
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 40px;
+    background: #10321f;
+    color: #ffffff;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  nav .logo { font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
+  nav a.back { color: #d9ecd9; text-decoration: none; font-weight: 500; }
+  nav a.back:hover { color: #4fd18b; }
+
+  .hero {
+    background: linear-gradient(135deg, #10321f 0%, #1565c0 100%);
+    color: #ffffff;
+    text-align: center;
+    padding: 70px 20px 80px;
+  }
+  .hero h1 { font-size: 38px; margin-bottom: 14px; }
+  .hero p { font-size: 18px; max-width: 620px; margin: 0 auto; color: #e6f0ea; }
+  .hero-illustration { margin-top: 36px; }
+  .hero-illustration svg { display: block; margin: 0 auto; width: 100%; max-width: 360px; height: auto; }
+
+  main { max-width: 800px; margin: 0 auto; padding: 60px 24px 90px; }
+  main h2 { font-size: 24px; color: #10321f; margin-bottom: 10px; }
+  main > p.intro { font-size: 16px; color: #445248; margin-bottom: 40px; line-height: 1.6; }
+
+  .step-list { display: flex; flex-direction: column; gap: 22px; margin-bottom: 50px; }
+  .step {
+    display: flex;
+    gap: 18px;
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 24px 26px;
+    box-shadow: 0 6px 18px rgba(16, 50, 31, 0.08);
+    border-left: 4px solid #4fd18b;
+  }
+  .step .num {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #e3f6ea;
+    color: #10321f;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .step h3 { font-size: 18px; color: #10321f; margin-bottom: 6px; }
+  .step p { font-size: 15px; line-height: 1.5; color: #445248; }
+
+  footer { background: #10321f; color: #cfe3d5; text-align: center; padding: 26px 20px; font-size: 14px; }
+
+  @media (max-width: 640px) {
+    nav { flex-direction: column; gap: 10px; padding: 16px 20px; }
+    .hero h1 { font-size: 28px; }
+    .step { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+  <nav>
+    <div class="logo">CarpoolGo</div>
+    <a class="back" href="index.html">← Volver a Inicio</a>
+  </nav>
+
+  <section class="hero">
+    <h1>Organiza el viaje y divide el gasto sin fricción</h1>
+    <p>Coordinar quién maneja y cuánto pone cada quien no debería ser un dolor de cabeza.</p>
+    <div class="hero-illustration">
+      <svg viewBox="0 0 400 220" xmlns="http://www.w3.org/2000/svg">
+        <path d="M60,70 L100,50 L140,60 L190,25" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.55"/>
+        <path d="M175,20 L195,25 L188,44" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.55"/>
+        <rect x="60" y="90" width="160" height="100" rx="16" fill="#ffffff"/>
+        <rect x="60" y="90" width="160" height="30" rx="16" fill="#10321f" fill-opacity="0.08"/>
+        <circle cx="190" cy="140" r="10" fill="#4fd18b"/>
+        <circle cx="270" cy="150" r="24" fill="#4fd18b"/>
+        <text x="270" y="158" font-size="22" font-weight="700" text-anchor="middle" fill="#10321f">$</text>
+        <circle cx="315" cy="112" r="16" fill="#ffffff"/>
+        <text x="315" y="118" font-size="15" font-weight="700" text-anchor="middle" fill="#10321f">$</text>
+      </svg>
+    </div>
+  </section>
+
+  <main>
+    <h2>Cómo se organiza el grupo</h2>
+    <p class="intro">Una vez que aceptan viajar juntos, esto es lo que CarpoolGo les ayuda a resolver.</p>
+
+    <div class="step-list">
+      <div class="step">
+        <div class="num">1</div>
+        <div>
+          <h3>Calculamos el costo por persona</h3>
+          <p>A partir de la distancia del trayecto, estimamos cuánto cuesta la gasolina y lo dividimos entre los pasajeros confirmados de ese viaje.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <div>
+          <h3>Rotan quién maneja</h3>
+          <p>El grupo puede proponer una rotación semanal entre sus integrantes, o dejar que siempre maneje la misma persona — ustedes deciden.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <div>
+          <h3>Acuerdan el método de pago</h3>
+          <p>Por ahora el pago se coordina directamente entre ustedes (efectivo o transferencia) dentro del chat del grupo; CarpoolGo todavía no procesa pagos dentro de la app.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">4</div>
+        <div>
+          <h3>Ven su historial de ahorro</h3>
+          <p>Cada quien puede consultar cuánto se ha ahorrado en gasolina desde que empezó a compartir ese trayecto.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2026 CarpoolGo. Todos los derechos reservados.
+  </footer>
+
+</body>
+</html>

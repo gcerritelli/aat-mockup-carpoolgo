@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registra tu Trayecto — CarpoolGo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; color: #1b2a22; background: #f4f9f5; }
+
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 40px;
+    background: #10321f;
+    color: #ffffff;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  nav .logo { font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
+  nav a.back { color: #d9ecd9; text-decoration: none; font-weight: 500; }
+  nav a.back:hover { color: #4fd18b; }
+
+  .hero {
+    background: linear-gradient(135deg, #10321f 0%, #1565c0 100%);
+    color: #ffffff;
+    text-align: center;
+    padding: 70px 20px 80px;
+  }
+  .hero h1 { font-size: 38px; margin-bottom: 14px; }
+  .hero p { font-size: 18px; max-width: 620px; margin: 0 auto; color: #e6f0ea; }
+  .hero-illustration { margin-top: 36px; }
+  .hero-illustration svg { display: block; margin: 0 auto; width: 100%; max-width: 360px; height: auto; }
+
+  main { max-width: 800px; margin: 0 auto; padding: 60px 24px 90px; }
+  main h2 { font-size: 24px; color: #10321f; margin-bottom: 10px; }
+  main > p.intro { font-size: 16px; color: #445248; margin-bottom: 40px; line-height: 1.6; }
+
+  .step-list { display: flex; flex-direction: column; gap: 22px; margin-bottom: 50px; }
+  .step {
+    display: flex;
+    gap: 18px;
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 24px 26px;
+    box-shadow: 0 6px 18px rgba(16, 50, 31, 0.08);
+    border-left: 4px solid #4fd18b;
+  }
+  .step .num {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #e3f6ea;
+    color: #10321f;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .step h3 { font-size: 18px; color: #10321f; margin-bottom: 6px; }
+  .step p { font-size: 15px; line-height: 1.5; color: #445248; }
+
+  footer { background: #10321f; color: #cfe3d5; text-align: center; padding: 26px 20px; font-size: 14px; }
+
+  @media (max-width: 640px) {
+    nav { flex-direction: column; gap: 10px; padding: 16px 20px; }
+    .hero h1 { font-size: 28px; }
+    .step { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+  <nav>
+    <div class="logo">CarpoolGo</div>
+    <a class="back" href="index.html">← Volver a Inicio</a>
+  </nav>
+
+  <section class="hero">
+    <h1>Registra tu trayecto en menos de 2 minutos</h1>
+    <p>Mientras más preciso seas con tu ruta y horario, mejores coincidencias vas a encontrar.</p>
+    <div class="hero-illustration">
+      <svg viewBox="0 0 400 220" xmlns="http://www.w3.org/2000/svg">
+        <rect x="30" y="20" width="340" height="180" rx="18" fill="#ffffff" fill-opacity="0.1" stroke="#ffffff" stroke-opacity="0.25" stroke-width="2"/>
+        <path d="M30,90 H370 M30,150 H370 M120,20 V200 M260,20 V200" stroke="#ffffff" stroke-opacity="0.12" stroke-width="2"/>
+        <path d="M70,160 C140,160 130,70 200,70 C260,70 260,120 330,120" fill="none" stroke="#4fd18b" stroke-width="5" stroke-linecap="round" stroke-dasharray="1 14"/>
+        <circle cx="70" cy="160" r="9" fill="#4fd18b"/>
+        <circle cx="330" cy="120" r="9" fill="#ffffff"/>
+        <g transform="translate(300,60)">
+          <circle r="22" fill="#ffffff"/>
+          <line x1="0" y1="0" x2="0" y2="-12" stroke="#10321f" stroke-width="3" stroke-linecap="round"/>
+          <line x1="0" y1="0" x2="8" y2="4" stroke="#10321f" stroke-width="3" stroke-linecap="round"/>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <main>
+    <h2>Qué te pedimos al registrar un trayecto</h2>
+    <p class="intro">Un trayecto es el viaje que haces de forma habitual — a tu trabajo, tu escuela, o cualquier otro destino recurrente. Puedes registrar más de uno.</p>
+
+    <div class="step-list">
+      <div class="step">
+        <div class="num">1</div>
+        <div>
+          <h3>Punto de partida y destino</h3>
+          <p>Indica tu dirección de salida (o una zona aproximada, si prefieres no compartir tu domicilio exacto) y tu destino habitual, como tu trabajo o escuela.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <div>
+          <h3>Horario de salida</h3>
+          <p>Indica la hora en la que normalmente sales, con una ventana de tolerancia — por ejemplo, entre las 7:00 y las 7:30 am.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <div>
+          <h3>Días de la semana</h3>
+          <p>Marca qué días haces este trayecto: de lunes a viernes, solo algunos días, o un horario irregular que tú defines.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">4</div>
+        <div>
+          <h3>Radio de tolerancia</h3>
+          <p>Define cuántos kilómetros de desvío estás dispuesto a aceptar para recoger o dejar a alguien en el camino, sin salirte demasiado de tu ruta.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">5</div>
+        <div>
+          <h3>Trayecto de regreso (opcional)</h3>
+          <p>Si también quieres compartir el viaje de vuelta, lo registras por separado, con su propio horario y punto de encuentro.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2026 CarpoolGo. Todos los derechos reservados.
+  </footer>
+
+</body>
+</html>

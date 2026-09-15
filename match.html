@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Encuentra Compañeros de Ruta — CarpoolGo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; color: #1b2a22; background: #f4f9f5; }
+
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 40px;
+    background: #10321f;
+    color: #ffffff;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  nav .logo { font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
+  nav a.back { color: #d9ecd9; text-decoration: none; font-weight: 500; }
+  nav a.back:hover { color: #4fd18b; }
+
+  .hero {
+    background: linear-gradient(135deg, #10321f 0%, #1565c0 100%);
+    color: #ffffff;
+    text-align: center;
+    padding: 70px 20px 80px;
+  }
+  .hero h1 { font-size: 38px; margin-bottom: 14px; }
+  .hero p { font-size: 18px; max-width: 620px; margin: 0 auto; color: #e6f0ea; }
+  .hero-illustration { margin-top: 36px; }
+  .hero-illustration svg { display: block; margin: 0 auto; width: 100%; max-width: 340px; height: auto; }
+
+  main { max-width: 800px; margin: 0 auto; padding: 60px 24px 90px; }
+  main h2 { font-size: 24px; color: #10321f; margin-bottom: 10px; }
+  main > p.intro { font-size: 16px; color: #445248; margin-bottom: 40px; line-height: 1.6; }
+
+  .step-list { display: flex; flex-direction: column; gap: 22px; margin-bottom: 50px; }
+  .step {
+    display: flex;
+    gap: 18px;
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 24px 26px;
+    box-shadow: 0 6px 18px rgba(16, 50, 31, 0.08);
+    border-left: 4px solid #4fd18b;
+  }
+  .step .num {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #e3f6ea;
+    color: #10321f;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .step h3 { font-size: 18px; color: #10321f; margin-bottom: 6px; }
+  .step p { font-size: 15px; line-height: 1.5; color: #445248; }
+  .step a { color: #1565c0; font-weight: 600; }
+
+  footer { background: #10321f; color: #cfe3d5; text-align: center; padding: 26px 20px; font-size: 14px; }
+
+  @media (max-width: 640px) {
+    nav { flex-direction: column; gap: 10px; padding: 16px 20px; }
+    .hero h1 { font-size: 28px; }
+    .step { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+  <nav>
+    <div class="logo">CarpoolGo</div>
+    <a class="back" href="index.html">← Volver a Inicio</a>
+  </nav>
+
+  <section class="hero">
+    <h1>Así encontramos a tu compañero de ruta</h1>
+    <p>El match no es al azar: cruzamos ubicación, horario y verificación antes de mostrarte a alguien.</p>
+    <div class="hero-illustration">
+      <svg viewBox="0 0 400 220" xmlns="http://www.w3.org/2000/svg">
+        <path d="M110,120 C170,60 230,180 290,120" fill="none" stroke="#ffffff" stroke-opacity="0.4" stroke-width="4" stroke-dasharray="2 12" stroke-linecap="round"/>
+        <g transform="translate(90,120)">
+          <circle r="34" fill="#ffffff"/>
+          <circle cy="-8" r="12" fill="#10321f" fill-opacity="0.15"/>
+          <path d="M-16,22 C-16,6 16,6 16,22 Z" fill="#10321f" fill-opacity="0.15"/>
+        </g>
+        <g transform="translate(310,120)">
+          <circle r="34" fill="#ffffff"/>
+          <circle cy="-8" r="12" fill="#10321f" fill-opacity="0.15"/>
+          <path d="M-16,22 C-16,6 16,6 16,22 Z" fill="#10321f" fill-opacity="0.15"/>
+        </g>
+        <g transform="translate(200,88)">
+          <circle r="22" fill="#4fd18b"/>
+          <path d="M-9,2 L-1,2 L-3,-9 L9,-2 L1,-2 L3,9 Z" fill="#10321f"/>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <main>
+    <h2>Cómo funciona el match</h2>
+    <p class="intro">Cada vez que registras o actualizas un trayecto, lo comparamos contra los trayectos de otros usuarios siguiendo estos pasos.</p>
+
+    <div class="step-list">
+      <div class="step">
+        <div class="num">1</div>
+        <div>
+          <h3>Comparamos tu ruta con las demás</h3>
+          <p>Buscamos usuarios cuyo origen y destino caen dentro del radio de tolerancia que definiste al registrar tu trayecto.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <div>
+          <h3>Cruzamos horarios compatibles</h3>
+          <p>De esos resultados, solo te mostramos a las personas cuya ventana de salida se traslapa con la tuya.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <div>
+          <h3>Ordenamos por compatibilidad</h3>
+          <p>Los resultados aparecen ordenados por qué tan cercana es la ruta y qué tanto coinciden los horarios, no por quién se registró primero.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">4</div>
+        <div>
+          <h3>Revisas el perfil antes de aceptar</h3>
+          <p>Ves su nombre, su calificación de viajes anteriores y si su identidad ya está verificada (ver <a href="seguridad.html">Viaja con Confianza</a>) antes de decidir si aceptas.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">5</div>
+        <div>
+          <h3>Confirman el viaje juntos</h3>
+          <p>Cuando ambos aceptan, se abre un chat dentro de la app para coordinar el punto exacto de encuentro y cualquier detalle de último momento.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2026 CarpoolGo. Todos los derechos reservados.
+  </footer>
+
+</body>
+</html>

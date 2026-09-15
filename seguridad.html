@@ -6,7 +6,7 @@
 <title>Seguridad — CarpoolGo</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Segoe UI', Arial, sans-serif; color: #1b2a22; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; color: #1b2a22; background: #f4f9f5; }
 
   nav {
     display: flex;
@@ -35,6 +35,8 @@
   }
   .hero h1 { font-size: 38px; margin-bottom: 14px; }
   .hero p { font-size: 18px; max-width: 620px; margin: 0 auto; color: #e6f0ea; }
+  .hero-illustration { margin-top: 36px; }
+  .hero-illustration svg { display: block; margin: 0 auto; width: 100%; max-width: 340px; height: auto; }
 
   main {
     max-width: 800px;
@@ -108,6 +110,20 @@
   <section class="hero">
     <h1>Tu seguridad es la base de CarpoolGo</h1>
     <p>Antes de que dos personas compartan un viaje, verificamos quiénes son. Esto es exactamente lo que le pedimos a cada usuario.</p>
+    <div class="hero-illustration">
+      <svg viewBox="0 0 400 220" xmlns="http://www.w3.org/2000/svg">
+        <rect x="60" y="40" width="220" height="140" rx="16" fill="#ffffff"/>
+        <circle cx="110" cy="90" r="22" fill="#c9e9d6"/>
+        <rect x="150" y="76" width="100" height="10" rx="5" fill="#10321f" fill-opacity="0.25"/>
+        <rect x="150" y="96" width="70" height="8" rx="4" fill="#10321f" fill-opacity="0.15"/>
+        <rect x="80" y="140" width="180" height="8" rx="4" fill="#10321f" fill-opacity="0.1"/>
+        <rect x="80" y="156" width="120" height="8" rx="4" fill="#10321f" fill-opacity="0.1"/>
+        <g transform="translate(300,150)">
+          <path d="M0,-36 L32,-24 C32,10 16,32 0,40 C-16,32 -32,10 -32,-24 Z" fill="#4fd18b"/>
+          <path d="M-14,0 L-4,12 L16,-14" fill="none" stroke="#10321f" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+      </svg>
+    </div>
   </section>
 
   <main>
