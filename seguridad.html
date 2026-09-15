@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seguridad — CarpoolGo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; color: #1b2a22; }
+
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 40px;
+    background: #10321f;
+    color: #ffffff;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  nav .logo { font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
+  nav a.back {
+    color: #d9ecd9;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  nav a.back:hover { color: #4fd18b; }
+
+  .hero {
+    background: linear-gradient(135deg, #10321f 0%, #1565c0 100%);
+    color: #ffffff;
+    text-align: center;
+    padding: 70px 20px 80px;
+  }
+  .hero h1 { font-size: 38px; margin-bottom: 14px; }
+  .hero p { font-size: 18px; max-width: 620px; margin: 0 auto; color: #e6f0ea; }
+
+  main {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 60px 24px 90px;
+  }
+  main h2 {
+    font-size: 24px;
+    color: #10321f;
+    margin-bottom: 10px;
+  }
+  main > p.intro {
+    font-size: 16px;
+    color: #445248;
+    margin-bottom: 40px;
+    line-height: 1.6;
+  }
+
+  .step-list {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    margin-bottom: 50px;
+  }
+  .step {
+    display: flex;
+    gap: 18px;
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 24px 26px;
+    box-shadow: 0 6px 18px rgba(16, 50, 31, 0.08);
+    border-left: 4px solid #4fd18b;
+  }
+  .step .num {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #e3f6ea;
+    color: #10321f;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .step h3 { font-size: 18px; color: #10321f; margin-bottom: 6px; }
+  .step p { font-size: 15px; line-height: 1.5; color: #445248; }
+
+  footer {
+    background: #10321f;
+    color: #cfe3d5;
+    text-align: center;
+    padding: 26px 20px;
+    font-size: 14px;
+  }
+
+  @media (max-width: 640px) {
+    nav { flex-direction: column; gap: 10px; padding: 16px 20px; }
+    .hero h1 { font-size: 28px; }
+    .step { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+  <nav>
+    <div class="logo">CarpoolGo</div>
+    <a class="back" href="index.html">← Volver a Inicio</a>
+  </nav>
+
+  <section class="hero">
+    <h1>Tu seguridad es la base de CarpoolGo</h1>
+    <p>Antes de que dos personas compartan un viaje, verificamos quiénes son. Esto es exactamente lo que le pedimos a cada usuario.</p>
+  </section>
+
+  <main>
+    <h2>Lo que verificamos al registrarte</h2>
+    <p class="intro">Nadie usa CarpoolGo de forma anónima. Cada cuenta pasa por este proceso antes de poder buscar o publicar un trayecto.</p>
+
+    <div class="step-list">
+      <div class="step">
+        <div class="num">1</div>
+        <div>
+          <h3>Foto tomada en vivo desde la app</h3>
+          <p>Te pedimos una selfie tomada en el momento, directo desde la cámara de la app — no se pueden subir fotos guardadas de la galería. Esto evita perfiles falsos o con fotos de otra persona.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <div>
+          <h3>Nombre completo e identificación oficial</h3>
+          <p>Pedimos tu nombre completo y una identificación oficial vigente (INE, pasaporte o licencia). Comparamos la foto de tu identificación con tu selfie para confirmar que son la misma persona.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <div>
+          <h3>Número de teléfono confirmado</h3>
+          <p>Verificamos tu número con un código por SMS. Es el mismo número que usamos para contactarte si hay algún problema durante un viaje.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">4</div>
+        <div>
+          <h3>Licencia de conducir (si vas a manejar)</h3>
+          <p>Si ofreces viajes como conductor, además pedimos tu licencia vigente y los datos del vehículo (placas, modelo, color) para que tus pasajeros sepan qué carro esperar.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">5</div>
+        <div>
+          <h3>Calificación después de cada viaje</h3>
+          <p>Al terminar cada trayecto, conductor y pasajero se califican mutuamente. Un perfil con calificaciones bajas o reportes recurrentes puede ser suspendido.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">6</div>
+        <div>
+          <h3>Ubicación compartida durante el viaje</h3>
+          <p>Mientras dura el trayecto, puedes compartir tu ubicación en tiempo real con un contacto de confianza, para que alguien más sepa dónde estás.</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    &copy; 2026 CarpoolGo. Todos los derechos reservados.
+  </footer>
+
+</body>
+</html>
