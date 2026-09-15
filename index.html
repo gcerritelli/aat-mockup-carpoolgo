@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarpoolGo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; color: #1b2a22; scroll-behavior: smooth; }
+
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 40px;
+    background: #10321f;
+    color: #ffffff;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  nav .logo { font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
+  nav ul { list-style: none; display: flex; gap: 28px; }
+  nav ul li a {
+    color: #d9ecd9;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  nav ul li a:hover { color: #4fd18b; }
+
+  .hero {
+    background: linear-gradient(135deg, #10321f 0%, #1565c0 100%);
+    color: #ffffff;
+    text-align: center;
+    padding: 100px 20px 110px;
+  }
+  .hero h1 { font-size: 46px; margin-bottom: 16px; }
+  .hero p { font-size: 19px; max-width: 560px; margin: 0 auto 32px; color: #e6f0ea; }
+  .hero button {
+    background: #4fd18b;
+    color: #0d2416;
+    border: none;
+    padding: 14px 34px;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: transform 0.15s, background 0.2s;
+  }
+  .hero button:hover { background: #3fc07c; transform: translateY(-2px); }
+
+  .cards {
+    padding: 80px 20px;
+    background: #f4f9f5;
+  }
+  .cards h2 {
+    text-align: center;
+    font-size: 30px;
+    margin-bottom: 50px;
+    color: #10321f;
+  }
+  .card-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 28px;
+    justify-content: center;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 32px 28px;
+    width: 300px;
+    box-shadow: 0 6px 18px rgba(16, 50, 31, 0.08);
+    border-top: 4px solid #4fd18b;
+    transition: transform 0.2s;
+  }
+  .card:hover { transform: translateY(-6px); }
+  .card .stat {
+    display: inline-block;
+    background: #e3f6ea;
+    color: #10321f;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+  }
+  .card h3 { font-size: 20px; margin-bottom: 10px; color: #10321f; }
+  .card p { font-size: 15px; line-height: 1.5; color: #445248; }
+
+  footer {
+    background: #10321f;
+    color: #cfe3d5;
+    text-align: center;
+    padding: 26px 20px;
+    font-size: 14px;
+  }
+
+  @media (max-width: 640px) {
+    nav { flex-direction: column; gap: 12px; padding: 16px 20px; }
+    nav ul { gap: 16px; flex-wrap: wrap; justify-content: center; }
+    .hero h1 { font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+
+  <nav id="inicio">
+    <div class="logo">CarpoolGo</div>
+    <ul>
+      <li><a href="#inicio">Inicio</a></li>
+      <li><a href="#como-funciona">Cómo Funciona</a></li>
+      <li><a href="#contacto">Contacto</a></li>
+    </ul>
+  </nav>
+
+  <section class="hero">
+    <h1>Comparte tu ruta diaria, no tu tráfico</h1>
+    <p>CarpoolGo conecta a personas que hacen trayectos similares al trabajo o la escuela para que organicen carpool, ahorren gasolina y reduzcan sus emisiones de carbono.</p>
+    <button>Encuentra tu Carpool</button>
+  </section>
+
+  <section class="cards" id="como-funciona">
+    <h2>Cómo Funciona</h2>
+    <div class="card-grid">
+      <div class="card">
+        <span class="stat">2 minutos</span>
+        <h3>Registra tu Trayecto</h3>
+        <p>Indica tu punto de partida, tu destino y tus horarios habituales de ida al trabajo o la escuela.</p>
+      </div>
+      <div class="card">
+        <span class="stat">Match inteligente</span>
+        <h3>Encuentra Compañeros de Ruta</h3>
+        <p>Te conectamos con personas cercanas que recorren un camino muy similar al tuyo, en horarios compatibles.</p>
+      </div>
+      <div class="card">
+        <span class="stat">-40% en gasolina</span>
+        <h3>Organiza y Ahorra</h3>
+        <p>Coordinen quién maneja cada día, dividan el gasto de gasolina y reduzcan juntos el tráfico y las emisiones de CO2.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer id="contacto">
+    &copy; 2026 CarpoolGo. Todos los derechos reservados.
+  </footer>
+
+</body>
+</html>
