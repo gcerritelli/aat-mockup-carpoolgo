@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Iniciar sesión — CarpoolGo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; color: #1b2a22; background: #f4f9f5; }
+
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 40px;
+    background: #10321f;
+    color: #ffffff;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  nav .logo { font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
+  nav a.back { color: #d9ecd9; text-decoration: none; font-weight: 500; }
+  nav a.back:hover { color: #4fd18b; }
+
+  main { max-width: 440px; margin: 0 auto; padding: 60px 24px 90px; }
+  main h1 { font-size: 28px; color: #10321f; margin-bottom: 10px; text-align: center; }
+  main > p.intro { font-size: 15px; color: #445248; margin-bottom: 30px; text-align: center; }
+
+  form {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 6px 18px rgba(16, 50, 31, 0.08);
+  }
+
+  label { display: block; font-size: 14px; font-weight: 600; color: #2b3c31; margin-bottom: 6px; margin-top: 16px; }
+  label:first-of-type { margin-top: 0; }
+
+  input[type="email"], input[type="password"] {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #cfe0d4;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: inherit;
+    color: #1b2a22;
+  }
+  input:focus { outline: 2px solid #4fd18b; border-color: transparent; }
+
+  button[type="submit"] {
+    width: 100%;
+    margin-top: 24px;
+    background: #4fd18b;
+    color: #0d2416;
+    border: none;
+    padding: 15px;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  button[type="submit"]:hover { background: #3fc07c; }
+  button[type="submit"]:disabled { opacity: 0.6; cursor: wait; }
+
+  .msg { margin-top: 16px; padding: 12px 16px; border-radius: 8px; font-size: 14px; display: none; }
+  .msg.show { display: block; }
+  .msg.error { background: #fde8e8; color: #9c2f2f; }
+  .msg.success { background: #e3f6ea; color: #10321f; }
+
+  .switch { text-align: center; margin-top: 22px; font-size: 14px; color: #445248; }
+  .switch a { color: #1565c0; font-weight: 600; text-decoration: none; }
+
+  footer { background: #10321f; color: #cfe3d5; text-align: center; padding: 26px 20px; font-size: 14px; }
+</style>
+</head>
+<body>
+
+  <nav>
+    <div class="logo">CarpoolGo</div>
+    <a class="back" href="index.html">← Volver a Inicio</a>
+  </nav>
+
+  <main>
+    <h1>Inicia sesión</h1>
+    <p class="intro">Entra con el correo y la contraseña que usaste al registrarte.</p>
+
+    <form id="form-login">
+      <label for="correo">Correo electrónico</label>
+      <input type="email" id="correo" required>
+
+      <label for="password">Contraseña</label>
+      <input type="password" id="password" required>
+
+      <button type="submit" id="btn-submit">Entrar</button>
+      <div class="msg error" id="msg-error"></div>
+      <div class="msg success" id="msg-success"></div>
+    </form>
+
+    <p class="switch">¿Todavía no tienes cuenta? <a href="registro.html">Regístrate aquí</a></p>
+  </main>
+
+  <footer>&copy; 2026 CarpoolGo. Todos los derechos reservados.</footer>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBM9QJkGNsOP_6gqwKFagrFLrTDmkloboM",
+      authDomain: "carpoolgo-b7728.firebaseapp.com",
+      projectId: "carpoolgo-b7728",
+      storageBucket: "carpoolgo-b7728.firebasestorage.app",
+      messagingSenderId: "133384054341",
+      appId: "1:133384054341:web:f8ef0cdfaafbbe9ebf652c"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    const form = document.getElementById('form-login');
+    const btnSubmit = document.getElementById('btn-submit');
+    const msgError = document.getElementById('msg-error');
+    const msgSuccess = document.getElementById('msg-success');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msgError.classList.remove('show');
+      msgSuccess.classList.remove('show');
+      btnSubmit.disabled = true;
+      btnSubmit.textContent = 'Entrando...';
+
+      try {
+        await auth.signInWithEmailAndPassword(
+          document.getElementById('correo').value,
+          document.getElementById('password').value
+        );
+
+        msgSuccess.textContent = '¡Listo! Entrando a tu cuenta...';
+        msgSuccess.classList.add('show');
+        setTimeout(() => {
+          window.location.href = 'app.html';
+        }, 600);
+      } catch (err) {
+        let texto = 'Algo salió mal. Intenta de nuevo.';
+        if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
+          texto = 'Correo o contraseña incorrectos.';
+        } else if (err.code === 'auth/invalid-email') {
+          texto = 'Ese correo no es válido.';
+        } else if (err.code === 'auth/too-many-requests') {
+          texto = 'Demasiados intentos. Espera un momento e intenta de nuevo.';
+        }
+        msgError.textContent = texto;
+        msgError.classList.add('show');
+        btnSubmit.textContent = 'Entrar';
+        btnSubmit.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

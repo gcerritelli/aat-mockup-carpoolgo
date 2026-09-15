@@ -51,6 +51,21 @@
     transition: transform 0.15s, background 0.2s;
   }
   .hero .btn:hover { background: #3fc07c; transform: translateY(-2px); }
+  .hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .hero .btn-secondary {
+    display: inline-block;
+    background: transparent;
+    color: #ffffff;
+    border: 2px solid rgba(255,255,255,0.5);
+    padding: 12px 32px;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 30px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .hero .btn-secondary:hover { border-color: #ffffff; background: rgba(255,255,255,0.08); }
   .hero-illustration { margin-top: 40px; }
   .hero-illustration svg { display: block; margin: 0 auto; width: 100%; max-width: 360px; height: auto; }
 
@@ -130,7 +145,10 @@
   <section class="hero">
     <h1>Comparte tu ruta diaria, no tu tráfico</h1>
     <p>CarpoolGo conecta a personas que hacen trayectos similares al trabajo o la escuela para que organicen carpool, ahorren gasolina y reduzcan sus emisiones de carbono.</p>
-    <a class="btn" href="registro.html">Encuentra tu Carpool</a>
+    <div class="hero-actions">
+      <a class="btn" href="registro.html">Encuentra tu Carpool</a>
+      <a class="btn-secondary" href="iniciar-sesion.html">Ya tengo cuenta</a>
+    </div>
     <div class="hero-illustration">
       <svg viewBox="0 0 400 220" xmlns="http://www.w3.org/2000/svg">
         <path d="M40,170 C120,60 260,190 360,50" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="4" stroke-dasharray="2 12" stroke-linecap="round"/>
