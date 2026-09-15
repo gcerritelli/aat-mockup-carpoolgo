@@ -361,6 +361,7 @@
 
       <div class="card" id="card-adeudos-home">
         <h2>Tus adeudos</h2>
+        <p class="hint" style="font-size:12px;color:#6b7d70;margin-bottom:12px;">CarpoolGo no cobra ni transfiere dinero. Esto solo lleva el registro de quién ya pagó (en efectivo, transferencia, etc.) y quién sigue debiendo.</p>
         <div id="lista-adeudos-home"><p class="empty-mini">Cargando...</p></div>
       </div>
     </div>
@@ -382,6 +383,7 @@
         <div class="avatar" id="avatar-detalle" style="width:68px;height:68px;font-size:26px;margin:0 auto 12px;">?</div>
         <h1 id="nombre-detalle">—</h1>
         <p class="uni-tag" id="universidad-detalle"></p>
+        <p id="instagram-detalle" style="margin-top:4px;"></p>
       </div>
       <div class="card" id="card-relacion-detalle"></div>
       <div class="card" id="card-descripcion-detalle" style="display:none;">
@@ -427,6 +429,17 @@
       </div>
 
       <div class="card">
+        <h2>Tu auto</h2>
+        <p class="hint" style="font-size:12px;color:#6b7d70;margin-bottom:10px;">Solo si vas a manejar. Tus pasajeros van a ver esto para reconocer tu auto.</p>
+        <label for="placas-input" style="margin-top:0;">Placas</label>
+        <input type="text" id="placas-input" placeholder="Ej. ABC-123">
+        <label for="modelo-input">Modelo</label>
+        <input type="text" id="modelo-input" placeholder="Ej. Nissan Versa 2020">
+        <label for="color-input">Color</label>
+        <input type="text" id="color-input" placeholder="Ej. Gris">
+      </div>
+
+      <div class="card">
         <h2>Organiza un ride</h2>
         <p style="font-size:14px;color:#445248;margin-bottom:12px;">Junta a tus amigos, elige quién maneja, y al final dividimos el gasto de gasolina entre todos.</p>
         <a class="save" style="display:block;text-align:center;text-decoration:none;" href="crear-ride.html">Start a Ride</a>
@@ -450,13 +463,19 @@
 
       <div class="card">
         <h2>Universidad</h2>
-        <label for="estado-input" style="margin-top:0;">Estado</label>
-        <select class="filtro" id="estado-input" style="margin-bottom:14px;">
-          <option value="">Selecciona tu estado</option>
+        <label for="pais-input" style="margin-top:0;">País</label>
+        <select class="filtro" id="pais-input" style="margin-bottom:14px;">
+          <option value="">Selecciona tu país</option>
         </select>
+        <div id="contenedor-estado" style="display:none;">
+          <label for="estado-input">Estado</label>
+          <select class="filtro" id="estado-input" style="margin-bottom:14px;">
+            <option value="">Selecciona tu estado</option>
+          </select>
+        </div>
         <label for="universidad-input">Universidad</label>
         <select class="filtro" id="universidad-input" style="margin-bottom:0;" disabled>
-          <option value="">Primero elige tu estado</option>
+          <option value="">Primero elige tu país</option>
         </select>
         <p class="hint" style="font-size:12px;color:#6b7d70;margin-top:6px;">Así te va a encontrar gente de tu misma universidad en Buscar.</p>
       </div>
@@ -464,6 +483,9 @@
       <div class="card">
         <h2>Cuéntale a tus compañeros de viaje sobre ti</h2>
         <textarea id="descripcion-input" placeholder="Ej. Trabajo en Reforma, me gusta la música y siempre llevo café de más por si alguien quiere."></textarea>
+        <label for="instagram-input">Instagram (opcional)</label>
+        <input type="text" id="instagram-input" placeholder="tu.usuario">
+        <p class="hint" style="font-size:12px;color:#6b7d70;margin-top:6px;">Otros usuarios van a ver esto en tu perfil.</p>
       </div>
 
       <button class="save" id="btn-guardar-desc" style="margin-bottom:16px;">Guardar cambios</button>
@@ -543,8 +565,139 @@
       "Zacatecas": ["Universidad Autónoma de Zacatecas"]
     };
 
+    // Cobertura amplia pero NO exhaustiva: universidades más reconocidas por país.
+    // No existe una lista completa y verificable de "todas las universidades del mundo",
+    // así que aquí van las más conocidas de cada país — se puede ampliar a pedido.
+    const universidadesPorPais = {
+      "Estados Unidos": ["Harvard University", "Stanford University", "Massachusetts Institute of Technology (MIT)", "University of California, Berkeley", "Yale University"],
+      "Canadá": ["University of Toronto", "McGill University", "University of British Columbia"],
+      "Reino Unido": ["University of Oxford", "University of Cambridge", "Imperial College London", "London School of Economics (LSE)"],
+      "Francia": ["Sorbonne Université", "Sciences Po", "École Polytechnique"],
+      "Alemania": ["Ludwig Maximilian University of Munich", "Technical University of Munich", "Heidelberg University"],
+      "España": ["Universidad Complutense de Madrid", "Universidad Autónoma de Madrid", "Universidad de Barcelona"],
+      "Italia": ["Università di Bologna", "Sapienza Università di Roma", "Politecnico di Milano"],
+      "Portugal": ["Universidade de Lisboa", "Universidade do Porto"],
+      "Países Bajos": ["University of Amsterdam", "Delft University of Technology"],
+      "Suiza": ["ETH Zurich", "University of Geneva"],
+      "Suecia": ["Uppsala University", "KTH Royal Institute of Technology"],
+      "Irlanda": ["Trinity College Dublin", "University College Dublin"],
+      "Bélgica": ["KU Leuven", "Université libre de Bruxelles"],
+      "Austria": ["University of Vienna"],
+      "Dinamarca": ["University of Copenhagen"],
+      "Noruega": ["University of Oslo"],
+      "Finlandia": ["University of Helsinki"],
+      "Polonia": ["University of Warsaw", "Jagiellonian University"],
+      "Grecia": ["National and Kapodistrian University of Athens"],
+      "Japón": ["University of Tokyo", "Kyoto University"],
+      "China": ["Tsinghua University", "Peking University", "Fudan University"],
+      "Corea del Sur": ["Seoul National University", "KAIST"],
+      "India": ["Indian Institute of Technology Bombay", "University of Delhi", "Indian Institute of Science"],
+      "Singapur": ["National University of Singapore", "Nanyang Technological University"],
+      "Rusia": ["Lomonosov Moscow State University", "Saint Petersburg State University"],
+      "Israel": ["Hebrew University of Jerusalem", "Tel Aviv University"],
+      "Turquía": ["Boğaziçi University", "Middle East Technical University"],
+      "Tailandia": ["Chulalongkorn University"],
+      "Vietnam": ["Vietnam National University"],
+      "Filipinas": ["University of the Philippines"],
+      "Indonesia": ["Universitas Indonesia"],
+      "Malasia": ["University of Malaya"],
+      "Arabia Saudita": ["King Saud University"],
+      "Emiratos Árabes Unidos": ["United Arab Emirates University", "Khalifa University"],
+      "Pakistán": ["Quaid-i-Azam University"],
+      "Argentina": ["Universidad de Buenos Aires"],
+      "Brasil": ["Universidade de São Paulo", "Universidade Estadual de Campinas"],
+      "Chile": ["Universidad de Chile", "Pontificia Universidad Católica de Chile"],
+      "Colombia": ["Universidad Nacional de Colombia", "Universidad de los Andes"],
+      "Perú": ["Pontificia Universidad Católica del Perú"],
+      "Uruguay": ["Universidad de la República"],
+      "Ecuador": ["Universidad San Francisco de Quito"],
+      "Venezuela": ["Universidad Central de Venezuela"],
+      "Bolivia": ["Universidad Mayor de San Andrés"],
+      "Paraguay": ["Universidad Nacional de Asunción"],
+      "Guatemala": ["Universidad de San Carlos de Guatemala"],
+      "Costa Rica": ["Universidad de Costa Rica"],
+      "Panamá": ["Universidad de Panamá"],
+      "Honduras": ["Universidad Nacional Autónoma de Honduras"],
+      "El Salvador": ["Universidad de El Salvador"],
+      "Nicaragua": ["Universidad Nacional Autónoma de Nicaragua"],
+      "República Dominicana": ["Universidad Autónoma de Santo Domingo"],
+      "Cuba": ["Universidad de La Habana"],
+      "Sudáfrica": ["University of Cape Town", "University of the Witwatersrand"],
+      "Egipto": ["Cairo University", "American University in Cairo"],
+      "Nigeria": ["University of Lagos", "University of Ibadan"],
+      "Kenia": ["University of Nairobi"],
+      "Marruecos": ["Université Mohammed V"],
+      "Ghana": ["University of Ghana"],
+      "Etiopía": ["Addis Ababa University"],
+      "Túnez": ["Université de Tunis"],
+      "Australia": ["University of Melbourne", "University of Sydney", "Australian National University"],
+      "Nueva Zelanda": ["University of Auckland", "University of Otago"]
+    };
+
+    // Europa cuenta como un solo bloque en Buscar (petición explícita del usuario).
+    const paisesEuropa = ["Reino Unido", "Francia", "Alemania", "España", "Italia", "Portugal", "Países Bajos", "Suiza", "Suecia", "Irlanda", "Bélgica", "Austria", "Dinamarca", "Noruega", "Finlandia", "Polonia", "Grecia"];
+
+    // Países vecinos: para Norteamérica sigue exactamente la regla que pediste
+    // (México ve EUA+Canadá; EUA ve solo Canadá; Canadá ve EUA+México).
+    // Para el resto, son fronteras reales — no exhaustivo, ampliable a pedido.
+    const paisesVecinos = {
+      "México": ["Estados Unidos", "Canadá"],
+      "Estados Unidos": ["Canadá"],
+      "Canadá": ["Estados Unidos", "México"],
+      "China": ["India", "Rusia", "Vietnam", "Pakistán"],
+      "India": ["China", "Pakistán"],
+      "Pakistán": ["India", "China"],
+      "Rusia": ["China"],
+      "Singapur": ["Malasia"],
+      "Malasia": ["Singapur", "Tailandia", "Indonesia"],
+      "Tailandia": ["Malasia", "Vietnam"],
+      "Vietnam": ["China", "Tailandia"],
+      "Indonesia": ["Malasia"],
+      "Israel": ["Egipto"],
+      "Egipto": ["Israel"],
+      "Turquía": ["Grecia"],
+      "Arabia Saudita": ["Emiratos Árabes Unidos"],
+      "Emiratos Árabes Unidos": ["Arabia Saudita"],
+      "Argentina": ["Chile", "Brasil", "Uruguay", "Paraguay", "Bolivia"],
+      "Brasil": ["Argentina", "Uruguay", "Paraguay", "Bolivia", "Perú", "Colombia", "Venezuela"],
+      "Chile": ["Argentina", "Perú", "Bolivia"],
+      "Colombia": ["Brasil", "Perú", "Ecuador", "Venezuela"],
+      "Perú": ["Chile", "Brasil", "Colombia", "Ecuador", "Bolivia"],
+      "Uruguay": ["Argentina", "Brasil"],
+      "Ecuador": ["Colombia", "Perú"],
+      "Venezuela": ["Colombia", "Brasil"],
+      "Bolivia": ["Argentina", "Brasil", "Chile", "Perú", "Paraguay"],
+      "Paraguay": ["Argentina", "Brasil", "Bolivia"],
+      "Guatemala": ["México", "Honduras", "El Salvador"],
+      "Costa Rica": ["Panamá"],
+      "Panamá": ["Costa Rica", "Colombia"],
+      "Honduras": ["Guatemala", "El Salvador", "Nicaragua"],
+      "El Salvador": ["Guatemala", "Honduras"],
+      "Nicaragua": ["Honduras", "Costa Rica"],
+      "Australia": ["Nueva Zelanda"],
+      "Nueva Zelanda": ["Australia"]
+    };
+
+    function paisesVisiblesParaBusqueda(miPais) {
+      if (!miPais) return [];
+      if (miPais === 'México') return ['México', ...paisesVecinos['México']];
+      if (paisesEuropa.includes(miPais)) return paisesEuropa.slice();
+      return [miPais, ...(paisesVecinos[miPais] || [])];
+    }
+
+    const todosPaises = ['México', ...Object.keys(universidadesPorPais).sort()];
+
+    const paisInput = document.getElementById('pais-input');
+    const contenedorEstado = document.getElementById('contenedor-estado');
     const estadoInput = document.getElementById('estado-input');
     const universidadInput = document.getElementById('universidad-input');
+
+    todosPaises.forEach((pais) => {
+      const opt = document.createElement('option');
+      opt.value = pais;
+      opt.textContent = pais;
+      paisInput.appendChild(opt);
+    });
 
     Object.keys(universidadesPorEstado).sort().forEach((estado) => {
       const opt = document.createElement('option');
@@ -580,6 +733,49 @@
         universidadInput.appendChild(opt);
       });
     }
+
+    function poblarUniversidadesPorPais(pais, universidadSeleccionada) {
+      universidadInput.innerHTML = '';
+      const lista = universidadesPorPais[pais] || [];
+
+      if (!pais || lista.length === 0) {
+        universidadInput.disabled = true;
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'Primero elige tu país';
+        universidadInput.appendChild(opt);
+        return;
+      }
+
+      universidadInput.disabled = false;
+      const optVacia = document.createElement('option');
+      optVacia.value = '';
+      optVacia.textContent = 'Selecciona tu universidad';
+      universidadInput.appendChild(optVacia);
+
+      lista.forEach((uni) => {
+        const opt = document.createElement('option');
+        opt.value = uni;
+        opt.textContent = uni;
+        if (uni === universidadSeleccionada) opt.selected = true;
+        universidadInput.appendChild(opt);
+      });
+    }
+
+    function actualizarPorPais(pais, estadoSeleccionado, universidadSeleccionada) {
+      if (pais === 'México') {
+        contenedorEstado.style.display = 'block';
+        poblarUniversidades(estadoSeleccionado, universidadSeleccionada);
+      } else {
+        contenedorEstado.style.display = 'none';
+        poblarUniversidadesPorPais(pais, universidadSeleccionada);
+      }
+    }
+
+    paisInput.addEventListener('change', () => {
+      estadoInput.value = '';
+      actualizarPorPais(paisInput.value, '', null);
+    });
 
     estadoInput.addEventListener('change', () => poblarUniversidades(estadoInput.value, null));
 
@@ -695,8 +891,9 @@
       const descripcion = datos.descripcion || '';
       const universidad = datos.universidad || '';
       const estado = datos.estado || '';
+      const pais = datos.pais || '';
       const fotoURL = datos.fotoURL || null;
-      miPerfil = { nombre, fotoURL };
+      miPerfil = { nombre, fotoURL, pais };
 
       document.getElementById('greeting').textContent = `Hola, ${nombre.split(' ')[0]}`;
       pintarAvatar(document.getElementById('avatar-home'), fotoURL, nombre);
@@ -706,9 +903,14 @@
       document.getElementById('correo-perfil').textContent = datos.correo || '';
       document.getElementById('telefono-perfil').textContent = datos.telefono || '—';
       document.getElementById('rol-perfil').textContent = datos.esConductor ? 'Conductor' : 'Pasajero';
+      document.getElementById('placas-input').value = datos.placas || '';
+      document.getElementById('modelo-input').value = datos.modelo || '';
+      document.getElementById('color-input').value = datos.colorAuto || '';
       document.getElementById('descripcion-input').value = descripcion;
+      document.getElementById('instagram-input').value = datos.instagram || '';
+      paisInput.value = pais;
       estadoInput.value = estado;
-      poblarUniversidades(estado, universidad);
+      actualizarPorPais(pais, estado, universidad);
 
       const descripcionHome = document.getElementById('descripcion-home');
       if (descripcion) {
@@ -743,8 +945,18 @@
       const valor = document.getElementById('descripcion-input').value;
       const universidad = universidadInput.value;
       const estado = estadoInput.value;
+      const pais = paisInput.value;
 
-      await db.collection('usuarios').doc(uid).set({ descripcion: valor, universidad: universidad, estado: estado }, { merge: true });
+      const placas = document.getElementById('placas-input').value;
+      const modelo = document.getElementById('modelo-input').value;
+      const colorAuto = document.getElementById('color-input').value;
+      const instagram = document.getElementById('instagram-input').value.trim().replace(/^@/, '');
+
+      await db.collection('usuarios').doc(uid).set({
+        descripcion: valor, universidad: universidad, estado: estado, pais: pais,
+        placas: placas, modelo: modelo, colorAuto: colorAuto, instagram: instagram
+      }, { merge: true });
+      miPerfil.pais = pais;
 
       const descripcionHome = document.getElementById('descripcion-home');
       if (valor) {
@@ -833,7 +1045,21 @@
       }).join('');
     }
 
-    const todasLasUniversidades = Object.values(universidadesPorEstado).flat().sort();
+    function universidadesVisibles() {
+      const pais = miPerfil && miPerfil.pais;
+      if (!pais) {
+        return [
+          ...Object.values(universidadesPorEstado).flat(),
+          ...Object.values(universidadesPorPais).flat()
+        ].sort();
+      }
+      const visibles = paisesVisiblesParaBusqueda(pais);
+      let lista = [];
+      visibles.forEach((p) => {
+        lista = lista.concat(p === 'México' ? Object.values(universidadesPorEstado).flat() : (universidadesPorPais[p] || []));
+      });
+      return lista.sort();
+    }
 
     const inputUniversidad = document.getElementById('input-universidad');
     const sugerenciasUniversidad = document.getElementById('sugerencias-universidad');
@@ -846,7 +1072,7 @@
         sugerenciasUniversidad.innerHTML = '';
         return;
       }
-      const uniMatches = todasLasUniversidades
+      const uniMatches = universidadesVisibles()
         .filter((u) => u.toLowerCase().includes(q))
         .slice(0, 5)
         .map((u) => ({ tipo: 'universidad', valor: u, label: u }));
@@ -909,7 +1135,7 @@
       }
     });
 
-    let miPerfil = { nombre: '', fotoURL: null };
+    let miPerfil = { nombre: '', fotoURL: null, pais: '' };
     let relacionesPromise = null;
     let misAmigos = new Set();
     let solicitudesEnviadas = new Set();
@@ -1088,6 +1314,7 @@
 
       document.getElementById('nombre-detalle').textContent = 'Cargando...';
       document.getElementById('universidad-detalle').textContent = '';
+      document.getElementById('instagram-detalle').innerHTML = '';
       document.getElementById('card-relacion-detalle').innerHTML = '';
       document.getElementById('card-descripcion-detalle').style.display = 'none';
       document.getElementById('card-trayecto-detalle').style.display = 'none';
@@ -1105,6 +1332,11 @@
       pintarAvatar(document.getElementById('avatar-detalle'), datos.fotoURL || null, nombre);
       document.getElementById('nombre-detalle').textContent = nombre;
       document.getElementById('universidad-detalle').textContent = datos.universidad || '';
+
+      const instagramEl = document.getElementById('instagram-detalle');
+      if (datos.instagram) {
+        instagramEl.innerHTML = `<a href="https://instagram.com/${escapeHtml(datos.instagram)}" target="_blank" rel="noopener" style="color:#1565c0;font-weight:600;font-size:13px;text-decoration:none;">📷 @${escapeHtml(datos.instagram)}</a>`;
+      }
 
       if (datos.descripcion) {
         document.getElementById('descripcion-detalle').textContent = datos.descripcion;
@@ -1225,7 +1457,7 @@
         contLista.innerHTML = rides.map((r) => {
           const esHost = r.hostUid === uid;
           const sub = r.estado === 'completado'
-            ? `$${Math.round(r.costoTotal || 0)} MXN en total`
+            ? `${r.simboloMoneda || '$'}${Math.round(r.costoTotal || 0)} ${r.moneda || 'MXN'} en total`
             : (r.estado === 'pendiente_host' ? 'Esperando que el host acepte' : `${r.participantes.length} personas en el ride`);
           return `
             <a class="ride-row" href="ride.html?id=${r.id}">
@@ -1239,34 +1471,113 @@
         }).join('');
       }
 
+      misRidesCache = rides;
+
       const balances = {};
+      const monedaPorClave = {};
+      const pendientesDeboYo = {};
+      const marcadosDeboYo = {};
+      const pendientesMeDeben = {};
+
       rides.filter((r) => r.estado === 'completado').forEach((r) => {
         const deudas = r.deudas || {};
+        const pagoEstado = r.pagoEstado || {};
+        const moneda = r.moneda || 'MXN';
+        const simbolo = r.simboloMoneda || '$';
         if (r.hostUid === uid) {
           Object.keys(deudas).forEach((pUid) => {
-            if (pUid === uid) return;
-            balances[pUid] = (balances[pUid] || 0) - deudas[pUid];
+            if (pUid === uid || pagoEstado[pUid] === 'confirmado') return;
+            const clave = `${pUid}|${moneda}`;
+            monedaPorClave[clave] = { otroId: pUid, moneda, simbolo };
+            balances[clave] = (balances[clave] || 0) - deudas[pUid];
+            (pendientesMeDeben[clave] = pendientesMeDeben[clave] || []).push(r.id);
           });
-        } else if (deudas[uid]) {
-          balances[r.hostUid] = (balances[r.hostUid] || 0) + deudas[uid];
+        } else if (deudas[uid] && pagoEstado[uid] !== 'confirmado') {
+          const clave = `${r.hostUid}|${moneda}`;
+          monedaPorClave[clave] = { otroId: r.hostUid, moneda, simbolo };
+          balances[clave] = (balances[clave] || 0) + deudas[uid];
+          if (pagoEstado[uid] === 'marcado') {
+            (marcadosDeboYo[clave] = marcadosDeboYo[clave] || []).push(r.id);
+          } else {
+            (pendientesDeboYo[clave] = pendientesDeboYo[clave] || []).push(r.id);
+          }
         }
       });
 
       const contAdeudos = document.getElementById('lista-adeudos-home');
-      const otrosUids = Object.keys(balances).filter((id) => Math.abs(balances[id]) > 0.5);
-      if (otrosUids.length === 0) {
+      const claves = Object.keys(balances).filter((clave) => Math.abs(balances[clave]) > 0.5);
+      if (claves.length === 0) {
         contAdeudos.innerHTML = '<p class="empty-mini">Estás al día, no tienes adeudos pendientes.</p>';
         return;
       }
-      const perfilesAdeudos = await Promise.all(otrosUids.map((id) => db.collection('usuarios').doc(id).get()));
-      contAdeudos.innerHTML = otrosUids.map((otroId, i) => {
+      const perfilesAdeudos = await Promise.all(claves.map((clave) => db.collection('usuarios').doc(monedaPorClave[clave].otroId).get()));
+      contAdeudos.innerHTML = claves.map((clave, i) => {
+        const { otroId, moneda, simbolo } = monedaPorClave[clave];
         const nombre = perfilesAdeudos[i].exists ? (perfilesAdeudos[i].data().nombre || 'Alguien') : 'Alguien';
-        const monto = balances[otroId];
-        return monto > 0
-          ? `<div class="deuda-row-home"><span>Le debes a ${escapeHtml(nombre)}</span><span class="monto owe">$${Math.round(monto)} MXN</span></div>`
-          : `<div class="deuda-row-home"><span>${escapeHtml(nombre)} te debe</span><span class="monto owed">$${Math.round(-monto)} MXN</span></div>`;
+        const monto = balances[clave];
+
+        if (monto > 0) {
+          const hayPendientes = (pendientesDeboYo[clave] || []).length > 0;
+          const accionHtml = hayPendientes
+            ? `<button class="btn-mini agregar" data-accion="ya-pague" data-uid="${escapeHtml(otroId)}" data-moneda="${escapeHtml(moneda)}">Ya pagué</button>`
+            : `<span class="btn-mini pendiente">Esperando confirmación</span>`;
+          return `
+            <div class="deuda-row-home">
+              <span>Le debes a ${escapeHtml(nombre)}</span>
+              <span class="monto owe">${simbolo}${Math.round(monto)} ${moneda}</span>
+            </div>
+            <div style="margin:-6px 0 10px;">${accionHtml}</div>
+          `;
+        }
+
+        return `
+          <div class="deuda-row-home">
+            <span>${escapeHtml(nombre)} te debe</span>
+            <span class="monto owed">${simbolo}${Math.round(-monto)} ${moneda}</span>
+          </div>
+          <div style="margin:-6px 0 10px;">
+            <button class="btn-mini agregar" data-accion="confirmar-pago" data-uid="${escapeHtml(otroId)}" data-moneda="${escapeHtml(moneda)}">Confirmar que recibí el pago</button>
+          </div>
+        `;
       }).join('');
     }
+
+    let misRidesCache = [];
+
+    document.getElementById('lista-adeudos-home').addEventListener('click', async (e) => {
+      const btn = e.target.closest('button[data-accion]');
+      if (!btn) return;
+      const uid = auth.currentUser && auth.currentUser.uid;
+      if (!uid) return;
+      const otroUid = btn.dataset.uid;
+      const monedaAccion = btn.dataset.moneda || 'MXN';
+
+      btn.disabled = true;
+      btn.textContent = 'Guardando...';
+
+      if (btn.dataset.accion === 'ya-pague') {
+        const ridesAfectados = misRidesCache.filter((r) =>
+          r.estado === 'completado' && r.hostUid === otroUid && (r.moneda || 'MXN') === monedaAccion &&
+          r.deudas && r.deudas[uid] !== undefined &&
+          (!r.pagoEstado || r.pagoEstado[uid] !== 'confirmado') &&
+          (!r.pagoEstado || r.pagoEstado[uid] !== 'marcado')
+        );
+        await Promise.all(ridesAfectados.map((r) =>
+          db.collection('rides').doc(r.id).update({ [`pagoEstado.${uid}`]: 'marcado' })
+        ));
+      } else if (btn.dataset.accion === 'confirmar-pago') {
+        const ridesAfectados = misRidesCache.filter((r) =>
+          r.estado === 'completado' && r.hostUid === uid && (r.moneda || 'MXN') === monedaAccion &&
+          r.deudas && r.deudas[otroUid] !== undefined &&
+          (!r.pagoEstado || r.pagoEstado[otroUid] !== 'confirmado')
+        );
+        await Promise.all(ridesAfectados.map((r) =>
+          db.collection('rides').doc(r.id).update({ [`pagoEstado.${otroUid}`]: 'confirmado' })
+        ));
+      }
+
+      cargarRides(uid);
+    });
 
     document.getElementById('lista-invitaciones-ride').addEventListener('click', async (e) => {
       const btn = e.target.closest('button[data-accion]');

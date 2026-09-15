@@ -44,7 +44,7 @@
   label { display: block; font-size: 14px; font-weight: 600; color: #2b3c31; margin-bottom: 6px; margin-top: 16px; }
   label:first-of-type { margin-top: 0; }
 
-  input[type="text"], input[type="email"], input[type="password"], input[type="tel"] {
+  input[type="text"], input[type="email"], input[type="password"], input[type="tel"], select {
     width: 100%;
     padding: 12px 14px;
     border: 1px solid #cfe0d4;
@@ -52,8 +52,9 @@
     font-size: 15px;
     font-family: inherit;
     color: #1b2a22;
+    background: #ffffff;
   }
-  input:focus { outline: 2px solid #4fd18b; border-color: transparent; }
+  input:focus, select:focus { outline: 2px solid #4fd18b; border-color: transparent; }
 
   .checkbox-row { display: flex; align-items: flex-start; gap: 10px; margin-top: 16px; }
   .checkbox-row input { margin-top: 4px; }
@@ -127,6 +128,11 @@
 
         <label for="telefono">Número de teléfono</label>
         <input type="tel" id="telefono" required>
+
+        <label for="pais">País</label>
+        <select id="pais" required>
+          <option value="">Selecciona tu país</option>
+        </select>
       </fieldset>
 
       <fieldset>
@@ -153,12 +159,7 @@
             <input type="checkbox" id="check-licencia">
             <label for="check-licencia">Entiendo que tendré que subir mi licencia de conducir vigente.</label>
           </div>
-          <label for="placas">Placas del auto</label>
-          <input type="text" id="placas">
-          <label for="modelo">Modelo del auto</label>
-          <input type="text" id="modelo">
-          <label for="color">Color del auto</label>
-          <input type="text" id="color">
+          <p class="hint" style="font-size:12px;color:#6b7d70;margin-top:10px;">Los datos de tu auto (placas, modelo, color) los agregas después, desde tu Perfil.</p>
         </div>
       </fieldset>
 
@@ -186,6 +187,15 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
+
+    const paisesRegistro = ['México', 'Estados Unidos', 'Canadá', 'Reino Unido', 'Francia', 'Alemania', 'España', 'Italia', 'Portugal', 'Países Bajos', 'Suiza', 'Suecia', 'Irlanda', 'Bélgica', 'Austria', 'Dinamarca', 'Noruega', 'Finlandia', 'Polonia', 'Grecia', 'Japón', 'China', 'Corea del Sur', 'India', 'Singapur', 'Rusia', 'Israel', 'Turquía', 'Tailandia', 'Vietnam', 'Filipinas', 'Indonesia', 'Malasia', 'Arabia Saudita', 'Emiratos Árabes Unidos', 'Pakistán', 'Argentina', 'Brasil', 'Chile', 'Colombia', 'Perú', 'Uruguay', 'Ecuador', 'Venezuela', 'Bolivia', 'Paraguay', 'Guatemala', 'Costa Rica', 'Panamá', 'Honduras', 'El Salvador', 'Nicaragua', 'República Dominicana', 'Cuba', 'Sudáfrica', 'Egipto', 'Nigeria', 'Kenia', 'Marruecos', 'Ghana', 'Etiopía', 'Túnez', 'Australia', 'Nueva Zelanda'].sort();
+    const selectPais = document.getElementById('pais');
+    paisesRegistro.forEach((pais) => {
+      const opt = document.createElement('option');
+      opt.value = pais;
+      opt.textContent = pais;
+      selectPais.appendChild(opt);
+    });
 
     const rolInputs = document.querySelectorAll('input[name="rol"]');
     const conductorFields = document.getElementById('conductor-fields');
@@ -219,13 +229,11 @@
           nombre: document.getElementById('nombre').value,
           correo: document.getElementById('correo').value,
           telefono: document.getElementById('telefono').value,
+          pais: document.getElementById('pais').value,
           selfieVerificada: false,
           identificacionVerificada: false,
           esConductor: esConductor,
           licenciaVerificada: false,
-          placas: esConductor ? document.getElementById('placas').value : null,
-          modelo: esConductor ? document.getElementById('modelo').value : null,
-          colorAuto: esConductor ? document.getElementById('color').value : null,
           creadoEn: firebase.firestore.FieldValue.serverTimestamp()
         });
 
