@@ -174,6 +174,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="i18n.js"></script>
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyBM9QJkGNsOP_6gqwKFagrFLrTDmkloboM",
@@ -230,6 +231,8 @@
           correo: document.getElementById('correo').value,
           telefono: document.getElementById('telefono').value,
           pais: document.getElementById('pais').value,
+          idioma: idiomaParaPais(document.getElementById('pais').value),
+          idiomaManual: false,
           selfieVerificada: false,
           identificacionVerificada: false,
           esConductor: esConductor,
@@ -237,11 +240,11 @@
           creadoEn: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        msgSuccess.textContent = '¡Cuenta creada! Ahora vamos a registrar tu trayecto...';
+        msgSuccess.textContent = '¡Cuenta creada! Vamos a tu perfil...';
         msgSuccess.classList.add('show');
         btnSubmit.textContent = 'Cuenta creada';
         setTimeout(() => {
-          window.location.href = 'registrar-trayecto.html';
+          window.location.href = 'app.html';
         }, 1200);
       } catch (err) {
         let texto = 'Algo salió mal. Intenta de nuevo.';

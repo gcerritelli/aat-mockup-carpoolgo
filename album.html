@@ -50,12 +50,29 @@
     gap: 8px;
   }
   .foto {
+    position: relative;
     aspect-ratio: 1;
     border-radius: 10px;
     overflow: hidden;
     background: #e3f6ea;
+    cursor: pointer;
   }
   .foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .foto-overlay {
+    position: absolute; inset: 0;
+    background: rgba(13, 36, 22, 0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+  }
+  .foto.mostrar-overlay .foto-overlay { display: flex; }
+  .btn-publicar {
+    background: #4fd18b; color: #0d2416; border: none;
+    padding: 7px 12px; border-radius: 16px;
+    font-size: 11px; font-weight: 700; cursor: pointer; text-align: center;
+  }
+  .btn-publicar.ya { background: #e3f6ea; color: #10321f; cursor: default; }
 
   .empty-state { text-align: center; padding: 50px 24px; color: #6b7d70; font-size: 14px; }
 </style>
@@ -71,7 +88,7 @@
       </div>
     </div>
     <main>
-      <p class="intro" id="intro-album">Solo las personas de este chat pueden ver y subir fotos aquí.</p>
+      <p class="intro" id="intro-album">Solo las personas de este chat pueden ver y subir fotos aquí. Toca una foto para publicarla en tu perfil.</p>
       <button class="btn-subir" id="btn-subir">+ Subir foto</button>
       <input type="file" id="foto-input" accept="image/*" style="display:none;">
       <div class="grid" id="grid-fotos">
@@ -176,6 +193,12 @@
       const albumRef = db.collection('albumes').doc(chatId);
       await albumRef.set({ participantes: participantes }, { merge: true });
 
+      const otrosParticipantes = participantes.filter((id) => id !== miUid);
+
+      let misPublicaciones = new Set();
+      const misPublicacionesSnap = await db.collection('usuarios').doc(miUid).collection('publicaciones').get();
+      misPublicaciones = new Set(misPublicacionesSnap.docs.map((d) => d.data().origenFotoId).filter(Boolean));
+
       const grid = document.getElementById('grid-fotos');
 
       albumRef.collection('fotos').orderBy('creadoEn', 'desc').onSnapshot((snap) => {
@@ -185,8 +208,51 @@
         }
         grid.innerHTML = snap.docs.map((d) => {
           const f = d.data();
-          return `<div class="foto"><img src="${f.fotoURL}" alt="Foto del álbum"></div>`;
+          const yaPublicada = misPublicaciones.has(d.id);
+          return `
+            <div class="foto" data-foto-id="${d.id}">
+              <img src="${f.fotoURL}" alt="Foto del álbum">
+              <div class="foto-overlay">
+                <button class="btn-publicar ${yaPublicada ? 'ya' : ''}" data-foto-id="${d.id}" ${yaPublicada ? 'disabled' : ''}>${yaPublicada ? 'Publicada ✓' : '📤 Publicar en tu perfil'}</button>
+              </div>
+            </div>
+          `;
         }).join('');
+      });
+
+      grid.addEventListener('click', async (e) => {
+        const btn = e.target.closest('.btn-publicar');
+        if (btn) {
+          e.stopPropagation();
+          if (btn.disabled) return;
+          const fotoId = btn.dataset.fotoId;
+          btn.disabled = true;
+          btn.textContent = 'Publicando...';
+          try {
+            const fotoDoc = await albumRef.collection('fotos').doc(fotoId).get();
+            if (fotoDoc.exists) {
+              await db.collection('usuarios').doc(miUid).collection('publicaciones').add({
+                fotoURL: fotoDoc.data().fotoURL,
+                conUids: otrosParticipantes,
+                origenFotoId: fotoId,
+                creadoEn: firebase.firestore.FieldValue.serverTimestamp()
+              });
+              misPublicaciones.add(fotoId);
+            }
+            btn.textContent = 'Publicada ✓';
+            btn.classList.add('ya');
+          } catch (err) {
+            btn.disabled = false;
+            btn.textContent = '📤 Publicar en tu perfil';
+          }
+          return;
+        }
+
+        const tile = e.target.closest('.foto');
+        if (!tile) return;
+        const yaAbierto = tile.classList.contains('mostrar-overlay');
+        grid.querySelectorAll('.foto.mostrar-overlay').forEach((t) => t.classList.remove('mostrar-overlay'));
+        if (!yaAbierto) tile.classList.add('mostrar-overlay');
       });
 
       const btnSubir = document.getElementById('btn-subir');

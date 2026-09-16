@@ -236,6 +236,15 @@
   .deuda-row-home .monto.owed { color: #10321f; }
   .avatar.avatar-sm { width: 34px; height: 34px; font-size: 13px; }
 
+  .fotos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .foto-publicada { position: relative; border-radius: 10px; overflow: hidden; background: #e3f6ea; }
+  .foto-publicada img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+  .foto-publicada .tag {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    background: rgba(16, 50, 31, 0.75); color: #ffffff;
+    font-size: 10px; font-weight: 600; padding: 4px 6px; line-height: 1.25;
+  }
+
   textarea {
     width: 100%;
     min-height: 100px;
@@ -338,7 +347,7 @@
       <div class="greeting" id="greeting">Cargando tu cuenta...</div>
     </div>
 
-    <div class="loading" id="loading">Cargando...</div>
+    <div class="loading" id="loading" data-i18n="cargando">Cargando...</div>
 
     <div class="view" id="view-home">
       <div class="post-card" style="margin-bottom: 16px;">
@@ -346,44 +355,44 @@
           <div class="avatar" id="avatar-home">?</div>
           <div class="who">
             <div class="name" id="nombre-home">—</div>
-            <div class="tag">Tu publicación</div>
+            <div class="tag" data-i18n="tag_publicacion">Tu publicación</div>
           </div>
         </div>
         <div class="post-body" id="descripcion-home">—</div>
-        <div class="route-chip" id="ruta-home">Sin trayecto registrado</div>
+        <div class="route-chip" id="ruta-home" data-i18n="sin_trayecto">Sin trayecto registrado</div>
       </div>
 
       <div class="card" id="card-rides-pendientes-home" style="display:none;">
-        <h2>Rides pendientes</h2>
+        <h2 data-i18n="rides_pendientes_titulo">Rides pendientes</h2>
         <div id="lista-rides-pendientes-home"></div>
       </div>
 
       <div class="card">
-        <h2>Organiza un ride</h2>
-        <p style="font-size:14px;color:#445248;margin-bottom:12px;">Junta a tus amigos, elige quién maneja, y al final dividimos el gasto de gasolina entre todos.</p>
+        <h2 data-i18n="organiza_titulo">Organiza un ride</h2>
+        <p data-i18n="organiza_texto" style="font-size:14px;color:#445248;margin-bottom:12px;">Junta a tus amigos, elige quién maneja, y al final dividimos el gasto de gasolina entre todos.</p>
         <a class="save" style="display:block;text-align:center;text-decoration:none;" href="crear-ride.html">Start a Ride</a>
       </div>
 
       <div class="card" id="card-adeudos-home">
-        <h2>Tus adeudos</h2>
-        <p class="hint" style="font-size:12px;color:#6b7d70;margin-bottom:12px;">CarpoolGo no cobra ni transfiere dinero. Esto solo lleva el registro de quién ya pagó (en efectivo, transferencia, etc.) y quién sigue debiendo.</p>
-        <div id="lista-adeudos-home"><p class="empty-mini">Cargando...</p></div>
+        <h2 data-i18n="adeudos_titulo">Tus adeudos</h2>
+        <p class="hint" data-i18n="adeudos_hint" style="font-size:12px;color:#6b7d70;margin-bottom:12px;">CarpoolGo no cobra ni transfiere dinero. Esto solo lleva el registro de quién ya pagó (en efectivo, transferencia, etc.) y quién sigue debiendo.</p>
+        <div id="lista-adeudos-home"><p class="empty-mini" data-i18n="cargando">Cargando...</p></div>
       </div>
     </div>
 
     <div class="view" id="view-buscar">
       <div class="buscador-uni">
-        <input type="text" id="input-universidad" class="filtro" placeholder="Busca tu universidad o usuario..." autocomplete="off">
+        <input type="text" id="input-universidad" class="filtro" data-i18n-ph="buscar_ph" placeholder="Busca tu universidad o usuario..." autocomplete="off">
         <button id="btn-limpiar-uni" style="display:none;">✕</button>
         <div id="sugerencias-universidad" class="sugerencias"></div>
       </div>
       <div id="resultados-buscar">
-        <div class="empty-state">Cargando otros usuarios...</div>
+        <div class="empty-state" data-i18n="buscar_cargando">Cargando otros usuarios...</div>
       </div>
     </div>
 
     <div class="view" id="view-perfil-usuario">
-      <button class="back-link" id="btn-volver-usuario">← Volver</button>
+      <button class="back-link" id="btn-volver-usuario" data-i18n="volver">← Volver</button>
       <div class="profile-header">
         <div class="avatar" id="avatar-detalle" style="width:68px;height:68px;font-size:26px;margin:0 auto 12px;">?</div>
         <h1 id="nombre-detalle">—</h1>
@@ -392,16 +401,20 @@
       </div>
       <div class="card" id="card-relacion-detalle"></div>
       <div class="card" id="card-descripcion-detalle" style="display:none;">
-        <h2>Sobre mí</h2>
+        <h2 data-i18n="sobre_mi">Sobre mí</h2>
         <p id="descripcion-detalle"></p>
       </div>
       <div class="card" id="card-trayecto-detalle" style="display:none;">
-        <h2>Trayecto</h2>
+        <h2 data-i18n="trayecto_titulo">Trayecto</h2>
         <p id="trayecto-detalle"></p>
       </div>
       <div class="card">
-        <h2>Sus amigos</h2>
-        <div id="lista-amigos-detalle"><p class="empty-mini">Cargando...</p></div>
+        <h2 data-i18n="sus_amigos">Sus amigos</h2>
+        <div id="lista-amigos-detalle"><p class="empty-mini" data-i18n="cargando">Cargando...</p></div>
+      </div>
+      <div class="card">
+        <h2 data-i18n="fotos_publicadas_detalle_titulo">Fotos de sus rides</h2>
+        <div id="grid-fotos-publicadas-detalle" class="fotos-grid"><p class="empty-mini" data-i18n="cargando">Cargando...</p></div>
       </div>
     </div>
 
@@ -418,110 +431,123 @@
       </div>
 
       <div class="card" id="card-solicitudes">
-        <h2>Solicitudes de amistad</h2>
-        <div id="lista-solicitudes"><p style="font-size:14px;color:#6b7d70;">Cargando...</p></div>
+        <h2 data-i18n="solicitudes_titulo">Solicitudes de amistad</h2>
+        <div id="lista-solicitudes"><p style="font-size:14px;color:#6b7d70;" data-i18n="cargando">Cargando...</p></div>
       </div>
 
       <div class="card" id="card-amigos">
-        <h2>Tus amigos</h2>
-        <div id="lista-amigos"><p style="font-size:14px;color:#6b7d70;">Cargando...</p></div>
+        <h2 data-i18n="tus_amigos">Tus amigos</h2>
+        <div id="lista-amigos"><p style="font-size:14px;color:#6b7d70;" data-i18n="cargando">Cargando...</p></div>
       </div>
 
       <div class="card">
-        <h2>Tus datos</h2>
-        <div class="row"><span>Teléfono</span><span id="telefono-perfil">—</span></div>
-        <div class="row"><span>Rol</span><span id="rol-perfil">—</span></div>
+        <h2 data-i18n="tus_datos">Tus datos</h2>
+        <div class="row"><span data-i18n="telefono_label">Teléfono</span><span id="telefono-perfil">—</span></div>
+        <div class="row"><span data-i18n="rol_label">Rol</span><span id="rol-perfil">—</span></div>
       </div>
 
       <div class="card">
-        <h2>Tu auto</h2>
-        <p class="hint" style="font-size:12px;color:#6b7d70;margin-bottom:10px;">Solo si vas a manejar. Tus pasajeros van a ver esto para reconocer tu auto.</p>
-        <label for="placas-input" style="margin-top:0;">Placas</label>
-        <input type="text" id="placas-input" placeholder="Ej. ABC-123">
-        <label for="modelo-input">Modelo</label>
-        <input type="text" id="modelo-input" placeholder="Ej. Nissan Versa 2020">
-        <label for="color-input">Color</label>
-        <input type="text" id="color-input" placeholder="Ej. Gris">
+        <h2 data-i18n="tu_auto_titulo">Tu auto</h2>
+        <p class="hint" data-i18n="tu_auto_hint" style="font-size:12px;color:#6b7d70;margin-bottom:10px;">Solo si vas a manejar. Tus pasajeros van a ver esto para reconocer tu auto.</p>
+        <label for="placas-input" data-i18n="placas_label" style="margin-top:0;">Placas</label>
+        <input type="text" id="placas-input" data-i18n-ph="placas_ph" placeholder="Ej. ABC-123">
+        <label for="modelo-input" data-i18n="modelo_label">Modelo</label>
+        <input type="text" id="modelo-input" data-i18n-ph="modelo_ph" placeholder="Ej. Nissan Versa 2020">
+        <label for="color-input" data-i18n="color_label">Color</label>
+        <input type="text" id="color-input" data-i18n-ph="color_ph" placeholder="Ej. Gris">
       </div>
 
       <div class="card">
-        <h2>Organiza un ride</h2>
-        <p style="font-size:14px;color:#445248;margin-bottom:12px;">Junta a tus amigos, elige quién maneja, y al final dividimos el gasto de gasolina entre todos.</p>
+        <h2 data-i18n="organiza_titulo">Organiza un ride</h2>
+        <p data-i18n="organiza_texto" style="font-size:14px;color:#445248;margin-bottom:12px;">Junta a tus amigos, elige quién maneja, y al final dividimos el gasto de gasolina entre todos.</p>
         <a class="save" style="display:block;text-align:center;text-decoration:none;" href="crear-ride.html">Start a Ride</a>
       </div>
 
       <div class="card" id="card-invitaciones-ride" style="display:none;">
-        <h2>Invitaciones de ride</h2>
+        <h2 data-i18n="invitaciones_titulo">Invitaciones de ride</h2>
         <div id="lista-invitaciones-ride"></div>
       </div>
 
       <div class="card" id="card-mis-rides">
-        <h2>Tus rides</h2>
-        <div id="lista-mis-rides"><p class="empty-mini">Cargando...</p></div>
+        <h2 data-i18n="mis_rides_titulo">Tus rides</h2>
+        <div id="lista-mis-rides"><p class="empty-mini" data-i18n="cargando">Cargando...</p></div>
+      </div>
+
+      <div class="card">
+        <h2 data-i18n="fotos_publicadas_titulo">Fotos de tus rides</h2>
+        <div id="grid-fotos-publicadas" class="fotos-grid"><p class="empty-mini" data-i18n="cargando">Cargando...</p></div>
       </div>
 
       <div class="card" id="card-trayecto">
-        <h2>Tu trayecto</h2>
-        <p id="trayecto-perfil">Todavía no has registrado un trayecto.</p>
-        <a class="link" href="registrar-trayecto.html">Registrar otro trayecto →</a>
+        <h2 data-i18n="tu_trayecto_titulo">Tu trayecto</h2>
+        <p id="trayecto-perfil" data-i18n="trayecto_vacio">Todavía no has registrado un trayecto.</p>
+        <a class="link" id="link-trayecto" href="registrar-trayecto.html" data-i18n="trayecto_link_nuevo">Registrar tu trayecto →</a>
       </div>
 
       <div class="card">
-        <h2>Universidad</h2>
-        <label for="pais-input" style="margin-top:0;">País</label>
+        <h2 data-i18n="universidad_titulo">Universidad</h2>
+        <label for="pais-input" data-i18n="pais_label" style="margin-top:0;">País</label>
         <select class="filtro" id="pais-input" style="margin-bottom:14px;">
-          <option value="">Selecciona tu país</option>
+          <option value="" data-i18n="pais_default_opt">Selecciona tu país</option>
         </select>
         <div id="contenedor-estado" style="display:none;">
-          <label for="estado-input">Estado</label>
+          <label for="estado-input" data-i18n="estado_label">Estado</label>
           <select class="filtro" id="estado-input" style="margin-bottom:14px;">
-            <option value="">Selecciona tu estado</option>
+            <option value="" data-i18n="estado_default_opt">Selecciona tu estado</option>
           </select>
         </div>
-        <label for="universidad-input">Universidad</label>
+        <label for="universidad-input" data-i18n="universidad_label">Universidad</label>
         <select class="filtro" id="universidad-input" style="margin-bottom:0;" disabled>
-          <option value="">Primero elige tu país</option>
+          <option value="" data-i18n="universidad_default_opt">Primero elige tu país</option>
         </select>
-        <p class="hint" style="font-size:12px;color:#6b7d70;margin-top:6px;">Así te va a encontrar gente de tu misma universidad en Buscar.</p>
+        <p class="hint" data-i18n="universidad_hint" style="font-size:12px;color:#6b7d70;margin-top:6px;">Así te va a encontrar gente de tu misma universidad en Buscar.</p>
       </div>
 
       <div class="card">
-        <h2>Cuéntale a tus compañeros de viaje sobre ti</h2>
-        <textarea id="descripcion-input" placeholder="Ej. Trabajo en Reforma, me gusta la música y siempre llevo café de más por si alguien quiere."></textarea>
-        <label for="instagram-input">Instagram (opcional)</label>
-        <input type="text" id="instagram-input" placeholder="tu.usuario">
-        <p class="hint" style="font-size:12px;color:#6b7d70;margin-top:6px;">Otros usuarios van a ver esto en tu perfil.</p>
+        <h2 data-i18n="idioma_titulo">Idioma de la app</h2>
+        <select class="filtro" id="idioma-input" style="margin-bottom:0;">
+        </select>
+        <p class="hint" data-i18n="idioma_hint" style="font-size:12px;color:#6b7d70;margin-top:6px;">Elige en qué idioma quieres ver la app. Si no lo cambias, usamos el idioma de tu país.</p>
       </div>
 
-      <button class="save" id="btn-guardar-desc" style="margin-bottom:16px;">Guardar cambios</button>
-      <div class="save-msg" id="save-msg">Guardado ✓</div>
+      <div class="card">
+        <h2 data-i18n="cuentales_titulo">Cuéntale a tus compañeros de viaje sobre ti</h2>
+        <textarea id="descripcion-input" data-i18n-ph="descripcion_ph" placeholder="Ej. Trabajo en Reforma, me gusta la música y siempre llevo café de más por si alguien quiere."></textarea>
+        <label for="instagram-input" data-i18n="instagram_label">Instagram (opcional)</label>
+        <input type="text" id="instagram-input" data-i18n-ph="instagram_ph" placeholder="tu.usuario">
+        <p class="hint" data-i18n="cuentales_hint" style="font-size:12px;color:#6b7d70;margin-top:6px;">Otros usuarios van a ver esto en tu perfil.</p>
+      </div>
 
-      <button class="logout" id="btn-logout">Cerrar sesión</button>
+      <button class="save" id="btn-guardar-desc" data-i18n="guardar_cambios" style="margin-bottom:16px;">Guardar cambios</button>
+      <div class="save-msg" id="save-msg" data-i18n="guardado_ok">Guardado ✓</div>
+
+      <button class="logout" id="btn-logout" data-i18n="cerrar_sesion">Cerrar sesión</button>
     </div>
 
     <div class="fab-wrap">
-      <a class="fab" href="chats.html" title="Chats">🚗</a>
+      <a class="fab" href="chats.html" data-i18n-title="fab_chats" title="Chats">🚗</a>
     </div>
   </div>
 
   <div class="tabbar">
     <button class="active" id="tab-home">
       <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
-      Inicio
+      <span data-i18n="tab_inicio">Inicio</span>
     </button>
     <button id="tab-buscar">
       <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      Buscar
+      <span data-i18n="tab_buscar">Buscar</span>
     </button>
     <button id="tab-perfil">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg>
-      Perfil
+      <span data-i18n="tab_perfil">Perfil</span>
     </button>
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="i18n.js"></script>
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyBM9QJkGNsOP_6gqwKFagrFLrTDmkloboM",
@@ -704,6 +730,17 @@
       paisInput.appendChild(opt);
     });
 
+    const idiomaInput = document.getElementById('idioma-input');
+    let idiomaManual = false;
+    let idiomaActual = IDIOMA_DEFAULT;
+    let ultimoEsConductor = false;
+    idiomasDisponibles.forEach((idiomaOpt) => {
+      const opt = document.createElement('option');
+      opt.value = idiomaOpt.codigo;
+      opt.textContent = idiomaOpt.nombre;
+      idiomaInput.appendChild(opt);
+    });
+
     Object.keys(universidadesPorEstado).sort().forEach((estado) => {
       const opt = document.createElement('option');
       opt.value = estado;
@@ -783,6 +820,19 @@
     });
 
     estadoInput.addEventListener('change', () => poblarUniversidades(estadoInput.value, null));
+
+    idiomaInput.addEventListener('change', async () => {
+      idiomaManual = true;
+      idiomaActual = idiomaInput.value;
+      aplicarTraducciones(idiomaActual);
+      document.getElementById('rol-perfil').textContent = ultimoEsConductor
+        ? t('rol_conductor', idiomaActual) : t('rol_pasajero', idiomaActual);
+      const descripcionHome = document.getElementById('descripcion-home');
+      if (descripcionHome.classList.contains('empty')) descripcionHome.textContent = t('sin_descripcion', idiomaActual);
+      const uid = auth.currentUser && auth.currentUser.uid;
+      if (!uid) return;
+      await db.collection('usuarios').doc(uid).set({ idioma: idiomaActual, idiomaManual: true }, { merge: true });
+    });
 
     const tabHome = document.getElementById('tab-home');
     const tabBuscar = document.getElementById('tab-buscar');
@@ -900,14 +950,20 @@
       const fotoURL = datos.fotoURL || null;
       miPerfil = { nombre, fotoURL, pais };
 
-      document.getElementById('greeting').textContent = `Hola, ${nombre.split(' ')[0]}`;
+      idiomaManual = !!datos.idiomaManual;
+      idiomaActual = datos.idioma || idiomaParaPais(pais);
+      ultimoEsConductor = !!datos.esConductor;
+      idiomaInput.value = idiomaActual;
+      aplicarTraducciones(idiomaActual);
+
+      document.getElementById('greeting').textContent = `${t('saludo_hola', idiomaActual)}, ${nombre.split(' ')[0]}`;
       pintarAvatar(document.getElementById('avatar-home'), fotoURL, nombre);
       pintarAvatar(document.getElementById('avatar-perfil'), fotoURL, nombre);
       document.getElementById('nombre-home').textContent = nombre;
       document.getElementById('nombre-perfil').textContent = nombre;
       document.getElementById('correo-perfil').textContent = datos.correo || '';
       document.getElementById('telefono-perfil').textContent = datos.telefono || '—';
-      document.getElementById('rol-perfil').textContent = datos.esConductor ? 'Conductor' : 'Pasajero';
+      document.getElementById('rol-perfil').textContent = ultimoEsConductor ? t('rol_conductor', idiomaActual) : t('rol_pasajero', idiomaActual);
       document.getElementById('placas-input').value = datos.placas || '';
       document.getElementById('modelo-input').value = datos.modelo || '';
       document.getElementById('color-input').value = datos.colorAuto || '';
@@ -922,18 +978,26 @@
         descripcionHome.textContent = descripcion;
         descripcionHome.classList.remove('empty');
       } else {
-        descripcionHome.textContent = 'Todavía no has escrito nada sobre ti. Ve a tu Perfil para agregar una descripción.';
+        descripcionHome.textContent = t('sin_descripcion', idiomaActual);
         descripcionHome.classList.add('empty');
       }
 
       if (!trayectosSnap.empty) {
-        const t = trayectosSnap.docs[0].data();
-        document.getElementById('ruta-home').textContent = textoTrayecto(t);
-        document.getElementById('trayecto-perfil').textContent = textoTrayecto(t);
+        const trayecto = trayectosSnap.docs[0].data();
+        const rutaHomeEl = document.getElementById('ruta-home');
+        const trayectoPerfilEl = document.getElementById('trayecto-perfil');
+        rutaHomeEl.textContent = textoTrayecto(trayecto);
+        rutaHomeEl.removeAttribute('data-i18n');
+        trayectoPerfilEl.textContent = textoTrayecto(trayecto);
+        trayectoPerfilEl.removeAttribute('data-i18n');
+        const linkTrayecto = document.getElementById('link-trayecto');
+        linkTrayecto.setAttribute('data-i18n', 'trayecto_link');
+        linkTrayecto.textContent = t('trayecto_link', idiomaActual);
       }
 
       relacionesPromise = cargarRelaciones(uid);
       cargarRides(uid);
+      cargarFotosPublicadas(uid, 'grid-fotos-publicadas', true);
 
       document.getElementById('loading').style.display = 'none';
       mostrarTab('home');
@@ -946,7 +1010,7 @@
       if (!uid) return;
 
       btn.disabled = true;
-      btn.textContent = 'Guardando...';
+      btn.textContent = t('guardando', idiomaActual);
       const valor = document.getElementById('descripcion-input').value;
       const universidad = universidadInput.value;
       const estado = estadoInput.value;
@@ -957,10 +1021,20 @@
       const colorAuto = document.getElementById('color-input').value;
       const instagram = document.getElementById('instagram-input').value.trim().replace(/^@/, '');
 
-      await db.collection('usuarios').doc(uid).set({
+      const datosGuardar = {
         descripcion: valor, universidad: universidad, estado: estado, pais: pais,
         placas: placas, modelo: modelo, colorAuto: colorAuto, instagram: instagram
-      }, { merge: true });
+      };
+
+      if (!idiomaManual && pais !== miPerfil.pais) {
+        idiomaActual = idiomaParaPais(pais);
+        idiomaInput.value = idiomaActual;
+        aplicarTraducciones(idiomaActual);
+        document.getElementById('rol-perfil').textContent = ultimoEsConductor ? t('rol_conductor', idiomaActual) : t('rol_pasajero', idiomaActual);
+        datosGuardar.idioma = idiomaActual;
+      }
+
+      await db.collection('usuarios').doc(uid).set(datosGuardar, { merge: true });
       miPerfil.pais = pais;
 
       const descripcionHome = document.getElementById('descripcion-home');
@@ -968,12 +1042,13 @@
         descripcionHome.textContent = valor;
         descripcionHome.classList.remove('empty');
       } else {
-        descripcionHome.textContent = 'Todavía no has escrito nada sobre ti. Ve a tu Perfil para agregar una descripción.';
+        descripcionHome.textContent = t('sin_descripcion', idiomaActual);
         descripcionHome.classList.add('empty');
       }
 
       btn.disabled = false;
-      btn.textContent = 'Guardar cambios';
+      btn.textContent = t('guardar_cambios', idiomaActual);
+      msg.textContent = t('guardado_ok', idiomaActual);
       msg.classList.add('show');
       setTimeout(() => msg.classList.remove('show'), 2000);
     });
@@ -1324,6 +1399,8 @@
       document.getElementById('card-descripcion-detalle').style.display = 'none';
       document.getElementById('card-trayecto-detalle').style.display = 'none';
       document.getElementById('lista-amigos-detalle').innerHTML = '<p class="empty-mini">Cargando...</p>';
+      document.getElementById('grid-fotos-publicadas-detalle').innerHTML = '<p class="empty-mini">Cargando...</p>';
+      cargarFotosPublicadas(uid, 'grid-fotos-publicadas-detalle', false);
 
       const [perfilDoc, trayectoSnap, amigosDeElSnap] = await Promise.all([
         db.collection('usuarios').doc(uid).get(),
@@ -1423,6 +1500,33 @@
         msg.textContent = 'No se pudo subir la foto. Intenta con otra imagen.';
       }
     });
+
+    async function cargarFotosPublicadas(uid, contenedorId, esPropio) {
+      const cont = document.getElementById(contenedorId);
+      const snap = await db.collection('usuarios').doc(uid).collection('publicaciones').orderBy('creadoEn', 'desc').get();
+
+      if (snap.empty) {
+        cont.innerHTML = `<p class="empty-mini">${t(esPropio ? 'sin_fotos_publicadas' : 'sin_fotos_publicadas_detalle', idiomaActual)}</p>`;
+        return;
+      }
+
+      const publicaciones = snap.docs.map((d) => d.data());
+      const todosUids = [...new Set(publicaciones.flatMap((p) => p.conUids || []))];
+      const perfiles = await Promise.all(todosUids.map((id) => db.collection('usuarios').doc(id).get()));
+      const nombrePorUid = {};
+      todosUids.forEach((id, i) => { nombrePorUid[id] = perfiles[i].exists ? (perfiles[i].data().nombre || 'Alguien') : 'Alguien'; });
+
+      cont.innerHTML = publicaciones.map((p) => {
+        const nombres = (p.conUids || []).map((id) => nombrePorUid[id] || 'Alguien');
+        const tag = nombres.length === 0 ? '' : (nombres.length <= 2 ? nombres.join(' y ') : `${nombres.slice(0, 2).join(', ')} y ${nombres.length - 2} más`);
+        return `
+          <div class="foto-publicada">
+            <img src="${p.fotoURL}" alt="Foto de ride">
+            ${tag ? `<div class="tag">${escapeHtml(tag)}</div>` : ''}
+          </div>
+        `;
+      }).join('');
+    }
 
     function estadoRideLabel(estado) {
       return { pendiente_host: 'Pendiente', activo: 'En curso', completado: 'Listo', rechazado: 'Rechazado' }[estado] || estado;
