@@ -204,6 +204,12 @@
         creadoEn: firebase.firestore.FieldValue.serverTimestamp()
       });
 
+      await db.collection('chatsGrupo').doc(`ride_${rideRef.id}`).set({
+        participantes: participantes,
+        rideId: rideRef.id,
+        creadoEn: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
       if (esHostYo) {
         window.location.href = `ride.html?id=${rideRef.id}`;
       } else {

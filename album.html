@@ -71,7 +71,7 @@
       </div>
     </div>
     <main>
-      <p class="intro">Solo tú y esta persona pueden ver y subir fotos aquí.</p>
+      <p class="intro" id="intro-album">Solo las personas de este chat pueden ver y subir fotos aquí.</p>
       <button class="btn-subir" id="btn-subir">+ Subir foto</button>
       <input type="file" id="foto-input" accept="image/*" style="display:none;">
       <div class="grid" id="grid-fotos">
@@ -125,12 +125,15 @@
 
     const params = new URLSearchParams(window.location.search);
     const conUid = params.get('con');
+    const rideId = params.get('ride');
 
-    if (!conUid) {
+    if (!conUid && !rideId) {
       window.location.href = 'chats.html';
     }
 
-    document.getElementById('link-volver').href = `chat.html?con=${encodeURIComponent(conUid)}`;
+    document.getElementById('link-volver').href = rideId
+      ? `chat.html?ride=${encodeURIComponent(rideId)}`
+      : `chat.html?con=${encodeURIComponent(conUid)}`;
 
     auth.onAuthStateChanged(async (user) => {
       if (!user) {
@@ -138,24 +141,40 @@
         return;
       }
       const miUid = user.uid;
-      if (conUid === miUid) {
-        window.location.href = 'chats.html';
-        return;
+
+      let chatId, participantes;
+
+      if (rideId) {
+        const rideDoc = await db.collection('rides').doc(rideId).get();
+        if (!rideDoc.exists || !rideDoc.data().participantes.includes(miUid)) {
+          window.location.href = 'chats.html';
+          return;
+        }
+        participantes = rideDoc.data().participantes;
+        chatId = `ride_${rideId}`;
+        document.getElementById('sub-nombre').textContent = `Fotos de este ride (${participantes.length} personas)`;
+      } else {
+        if (conUid === miUid) {
+          window.location.href = 'chats.html';
+          return;
+        }
+
+        const amistadDoc = await db.collection('usuarios').doc(miUid).collection('amigos').doc(conUid).get();
+        if (!amistadDoc.exists) {
+          window.location.href = 'chats.html';
+          return;
+        }
+
+        participantes = [miUid, conUid];
+        chatId = chatIdPara(miUid, conUid);
+
+        const perfilDoc = await db.collection('usuarios').doc(conUid).get();
+        const nombreOtro = perfilDoc.exists ? (perfilDoc.data().nombre || 'Sin nombre') : 'Sin nombre';
+        document.getElementById('sub-nombre').textContent = `Contigo y ${nombreOtro}`;
       }
 
-      const amistadDoc = await db.collection('usuarios').doc(miUid).collection('amigos').doc(conUid).get();
-      if (!amistadDoc.exists) {
-        window.location.href = 'chats.html';
-        return;
-      }
-
-      const perfilDoc = await db.collection('usuarios').doc(conUid).get();
-      const nombreOtro = perfilDoc.exists ? (perfilDoc.data().nombre || 'Sin nombre') : 'Sin nombre';
-      document.getElementById('sub-nombre').textContent = `Contigo y ${nombreOtro}`;
-
-      const chatId = chatIdPara(miUid, conUid);
       const albumRef = db.collection('albumes').doc(chatId);
-      await albumRef.set({ participantes: [miUid, conUid] }, { merge: true });
+      await albumRef.set({ participantes: participantes }, { merge: true });
 
       const grid = document.getElementById('grid-fotos');
 

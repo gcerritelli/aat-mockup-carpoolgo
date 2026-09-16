@@ -43,11 +43,12 @@
   input:focus { outline: 2px solid #4fd18b; border-color: transparent; }
   .hint { font-size: 12px; color: #6b7d70; margin-top: 6px; }
 
-  button.accion {
+  button.accion, a.accion {
     width: 100%; background: #4fd18b; color: #0d2416; border: none;
     padding: 14px; font-size: 15px; font-weight: 700; border-radius: 26px; cursor: pointer; margin-top: 16px;
+    display: block; box-sizing: border-box; text-align: center; text-decoration: none; line-height: 1.4;
   }
-  button.accion:hover { background: #3fc07c; }
+  button.accion:hover, a.accion:hover { background: #3fc07c; }
   button.accion:disabled { opacity: 0.6; cursor: wait; }
   button.rechazar-btn {
     width: 100%; background: none; border: 1px solid #e0b4b4; color: #9c2f2f;
@@ -75,6 +76,23 @@
 
   .checkbox-inline { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; color: #2b3c31; margin-top: 16px; cursor: pointer; }
   .checkbox-inline input { width: 18px; height: 18px; }
+
+  .viaje-track { display: flex; align-items: center; margin: 14px 0 6px; }
+  .viaje-paso { text-align: center; font-size: 11px; color: #93a69a; font-weight: 700; width: 60px; flex-shrink: 0; }
+  .viaje-paso .icono { font-size: 20px; display: block; margin-bottom: 4px; opacity: 0.4; }
+  .viaje-paso.activo { color: #10321f; }
+  .viaje-paso.activo .icono { opacity: 1; }
+  .viaje-linea { flex: 1; height: 3px; background: #e3ecE6; position: relative; }
+  .viaje-linea.activa { background: #4fd18b; }
+  .viaje-carro { position: absolute; top: -11px; font-size: 20px; }
+  .viaje-carro.en-marcha { animation: manejar 1.1s ease-in-out infinite alternate; }
+  @keyframes manejar {
+    0% { transform: translateX(0) translateY(0); }
+    100% { transform: translateX(6px) translateY(-2px); }
+  }
+  .viaje-msg { font-size: 14px; color: #2b3c31; background: #f4f9f5; border-radius: 10px; padding: 12px 14px; margin: 14px 0; }
+  .recogido-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; font-size: 13px; color: #445248; }
+  .recogido-row .ok { color: #10321f; font-weight: 700; }
 </style>
 </head>
 <body>
@@ -138,6 +156,9 @@
       "Australia": { moneda: "AUD", simbolo: "$", costoPorKm: 0.13 }
     };
     const MONEDA_DEFAULT = { moneda: "USD", simbolo: "$", costoPorKm: 0.10 };
+    // No tenemos integración con Google Maps (requiere API de pago), así que
+    // estimamos km a partir del tiempo asumiendo una velocidad promedio de ciudad.
+    const VELOCIDAD_PROMEDIO_KMH = 40;
 
     function monedaParaPais(pais) {
       return monedaPorPais[pais] || MONEDA_DEFAULT;
@@ -165,27 +186,41 @@
       return mapa;
     }
 
-    auth.onAuthStateChanged(async (user) => {
+    let miUid = null;
+
+    auth.onAuthStateChanged((user) => {
       if (!user) {
         window.location.href = 'registro.html';
         return;
       }
-      const miUid = user.uid;
+      miUid = user.uid;
 
-      const rideDoc = await db.collection('rides').doc(rideId).get();
-      if (!rideDoc.exists) {
-        cont.innerHTML = '<p class="empty-mini">Este ride ya no existe.</p>';
-        return;
-      }
-      const ride = rideDoc.data();
-      if (!ride.participantes.includes(miUid)) {
-        window.location.href = 'app.html';
-        return;
-      }
+      db.collection('rides').doc(rideId).onSnapshot(async (rideDoc) => {
+        if (!rideDoc.exists) {
+          cont.innerHTML = '<p class="empty-mini">Este ride ya no existe.</p>';
+          return;
+        }
+        const ride = rideDoc.data();
+        if (!ride.participantes.includes(miUid)) {
+          window.location.href = 'app.html';
+          return;
+        }
+        const perfiles = await cargarPerfiles(ride.participantes);
+        renderRide(ride, perfiles);
+      });
+    });
 
-      const perfiles = await cargarPerfiles(ride.participantes);
+    function renderRide(ride, perfiles) {
       const esHost = ride.hostUid === miUid;
       const hostNombre = perfiles[ride.hostUid] ? perfiles[ride.hostUid].nombre : 'el host';
+
+      const chatCardHtml = `
+        <div class="card">
+          <h2>Chat del ride</h2>
+          <p style="margin-bottom:10px;">Platica en vivo con quienes van en este ride y suban fotos juntos al álbum.</p>
+          <a class="accion" href="chat.html?ride=${encodeURIComponent(rideId)}">💬 Abrir chat del ride</a>
+        </div>
+      `;
 
       const listaParticipantesHtml = ride.participantes.map((uid) => {
         const p = perfiles[uid] || {};
@@ -207,6 +242,7 @@
             <h2>Ride rechazado</h2>
             <p>${escapeHtml(hostNombre)} no pudo aceptar manejar este ride.</p>
           </div>
+          ${chatCardHtml}
         `;
         return;
       }
@@ -222,14 +258,13 @@
             <button class="accion" id="btn-aceptar">Aceptar y manejar</button>
             <button class="rechazar-btn" id="btn-rechazar">Rechazar</button>
           </div>
+          ${chatCardHtml}
         `;
         document.getElementById('btn-aceptar').addEventListener('click', async () => {
           await db.collection('rides').doc(rideId).set({ estado: 'activo' }, { merge: true });
-          window.location.reload();
         });
         document.getElementById('btn-rechazar').addEventListener('click', async () => {
           await db.collection('rides').doc(rideId).set({ estado: 'rechazado' }, { merge: true });
-          window.location.reload();
         });
         return;
       }
@@ -241,24 +276,72 @@
             <p>Le mandamos la invitación a ${escapeHtml(hostNombre)} para manejar este ride. En cuanto la acepte, vas a poder ver los detalles aquí.</p>
           </div>
           <div class="card">${listaParticipantesHtml}</div>
+          ${chatCardHtml}
         `;
         return;
       }
 
-      if (ride.estado === 'activo' && esHost) {
+      if (ride.estado === 'activo') {
         const miMoneda = monedaParaPais((perfiles[ride.hostUid] || {}).pais);
+        const pasajerosUids = ride.participantes.filter((uid) => uid !== ride.hostUid);
+        const recogidos = ride.viajeRecogidos || {};
+        const hostSalio = !!ride.viajeHostSalio;
+        const llegaron = !!ride.viajeLlegaron;
+        const yoRecogido = !!recogidos[miUid];
+        const todosRecogidos = pasajerosUids.length > 0 && pasajerosUids.every((uid) => recogidos[uid]);
+
+        let mensaje;
+        if (llegaron) {
+          mensaje = '🏁 Ya llegaron. Capturen los datos abajo para dividir el gasto.';
+        } else if (esHost && !hostSalio) {
+          mensaje = 'Avísales a todos cuando salgas de tu casa.';
+        } else if (esHost && hostSalio) {
+          mensaje = 'Vas en camino. Marca "Ya llegamos" cuando terminen el viaje.';
+        } else if (!hostSalio) {
+          mensaje = `${escapeHtml(hostNombre)} todavía no ha salido de su casa.`;
+        } else if (!yoRecogido) {
+          mensaje = `🚗 ${escapeHtml(hostNombre)} ya salió y te está esperando.`;
+        } else {
+          mensaje = 'Ya vas en el carro rumbo a su destino.';
+        }
+
+        const recogidosHtml = pasajerosUids.map((uid) => {
+          const p = perfiles[uid] || {};
+          return `
+            <div class="recogido-row">
+              <span>${escapeHtml(p.nombre || 'Alguien')}${uid === miUid ? ' (tú)' : ''}</span>
+              <span class="${recogidos[uid] ? 'ok' : ''}">${recogidos[uid] ? '✅ En el carro' : '⏳ Esperando'}</span>
+            </div>
+          `;
+        }).join('');
+
+        const enMarcha = hostSalio && !llegaron;
+
         cont.innerHTML = `
           <div class="card">${listaParticipantesHtml}</div>
           <div class="card">
-            <h2>Termina el ride</h2>
-            <p style="margin-bottom:10px;">Captura estos datos al terminar para calcular cuánto se gastó en gasolina y dividirlo entre todos (tú no pagas, solo tus pasajeros).</p>
+            <h2>Estado del viaje</h2>
+            <div class="viaje-track">
+              <div class="viaje-paso ${hostSalio ? 'activo' : ''}"><span class="icono">🏠</span>Salió</div>
+              <div class="viaje-linea ${hostSalio ? 'activa' : ''}">${enMarcha ? `<span class="viaje-carro en-marcha">🚗</span>` : ''}</div>
+              <div class="viaje-paso ${todosRecogidos ? 'activo' : ''}"><span class="icono">🙋</span>Recogiendo</div>
+              <div class="viaje-linea ${todosRecogidos ? 'activa' : ''}"></div>
+              <div class="viaje-paso ${llegaron ? 'activo' : ''}"><span class="icono">🏁</span>Llegaron</div>
+            </div>
+            <div class="viaje-msg">${mensaje}</div>
+            ${recogidosHtml}
+            ${esHost && !hostSalio ? '<button class="accion" id="btn-sali">🚗 Ya salí de mi casa</button>' : ''}
+            ${!esHost && !yoRecogido ? '<button class="accion" id="btn-recogido">✅ Ya me recogieron</button>' : ''}
+            ${!llegaron ? '<button class="accion" id="btn-llegamos" style="background:#1565c0;color:#ffffff;">🏁 Ya llegamos</button>' : ''}
+          </div>
+          <div class="card">
+            <h2>${llegaron ? 'Termina el ride' : 'Terminar el ride (cuando quieran)'}</h2>
+            <p style="margin-bottom:10px;">Cualquiera de ustedes puede capturar estos datos para calcular cuánto se gastó en gasolina y dividirlo (el conductor no paga, solo los pasajeros).</p>
             <label for="origen">Origen</label>
             <input type="text" id="origen" placeholder="De dónde salieron">
             <label for="destino">Destino</label>
             <input type="text" id="destino" placeholder="A dónde llegaron">
-            <label for="km">Distancia total (km)</label>
-            <input type="number" id="km" min="1" step="0.1" placeholder="Ej. 12.5">
-            <label for="min">Duración total (minutos)</label>
+            <label for="min">¿Cuánto tiempo se tardaron? (minutos)</label>
             <input type="number" id="min" min="1" placeholder="Ej. 35">
 
             <label>¿Se repite en la semana? (opcional)</label>
@@ -275,23 +358,47 @@
 
             <label class="checkbox-inline"><input type="checkbox" id="redondo"> Fue de ida y vuelta (redondo)</label>
 
-            <p class="hint">Estimamos el costo con ${miMoneda.simbolo}${miMoneda.costoPorKm} ${miMoneda.moneda} por km (precio de gasolina de referencia en tu país). Es un cálculo aproximado, no viene de GPS.</p>
+            <p class="hint">Con el tiempo estimamos la distancia (asumiendo ~${VELOCIDAD_PROMEDIO_KMH} km/h en promedio) y calculamos el costo con ${miMoneda.simbolo}${miMoneda.costoPorKm} ${miMoneda.moneda} por km (precio de gasolina del país del conductor). Es un cálculo aproximado, no viene de GPS ni de Google Maps.</p>
             <button class="accion" id="btn-terminar">Calcular y dividir gasto</button>
             <div class="empty-mini" id="msg-ride-error" style="display:none;color:#9c2f2f;margin-top:8px;"></div>
           </div>
+          ${chatCardHtml}
         `;
+
+        const btnSali = document.getElementById('btn-sali');
+        if (btnSali) btnSali.addEventListener('click', async () => {
+          btnSali.disabled = true;
+          await db.collection('rides').doc(rideId).update({
+            viajeHostSalio: true,
+            viajeHostSalioEn: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        });
+
+        const btnRecogido = document.getElementById('btn-recogido');
+        if (btnRecogido) btnRecogido.addEventListener('click', async () => {
+          btnRecogido.disabled = true;
+          await db.collection('rides').doc(rideId).update({ [`viajeRecogidos.${miUid}`]: true });
+        });
+
+        const btnLlegamos = document.getElementById('btn-llegamos');
+        if (btnLlegamos) btnLlegamos.addEventListener('click', async () => {
+          btnLlegamos.disabled = true;
+          await db.collection('rides').doc(rideId).update({ viajeLlegaron: true });
+        });
+
         document.getElementById('btn-terminar').addEventListener('click', async () => {
-          const km = parseFloat(document.getElementById('km').value);
           const min = parseFloat(document.getElementById('min').value);
           const origen = document.getElementById('origen').value.trim();
           const destino = document.getElementById('destino').value.trim();
           const errEl = document.getElementById('msg-ride-error');
 
-          if (!km || km <= 0) {
-            errEl.textContent = 'Indica la distancia en kilómetros.';
+          if (!min || min <= 0) {
+            errEl.textContent = 'Indica cuánto tiempo se tardaron, en minutos.';
             errEl.style.display = 'block';
             return;
           }
+
+          const km = (min / 60) * VELOCIDAD_PROMEDIO_KMH;
 
           const dias = Array.from(document.querySelectorAll('#dias-semana input:checked')).map((el) => el.value);
           const esRedondo = document.getElementById('redondo').checked;
@@ -320,22 +427,10 @@
             moneda: miMoneda.moneda,
             simboloMoneda: miMoneda.simbolo,
             deudas: deudas,
+            terminadoPor: miUid,
             completadoEn: firebase.firestore.FieldValue.serverTimestamp()
           }, { merge: true });
-
-          window.location.reload();
         });
-        return;
-      }
-
-      if (ride.estado === 'activo' && !esHost) {
-        cont.innerHTML = `
-          <div class="card">${listaParticipantesHtml}</div>
-          <div class="card">
-            <h2>Ride en curso</h2>
-            <p>${escapeHtml(hostNombre)} está manejando. Cuando termine el viaje va a capturar los datos aquí mismo y vas a ver cuánto le toca pagar a cada quien.</p>
-          </div>
-        `;
         return;
       }
 
@@ -377,12 +472,13 @@
           </div>
           ${panelDeuda}
           <div class="card">${listaParticipantesHtml}</div>
+          ${chatCardHtml}
         `;
         return;
       }
 
       cont.innerHTML = '<p class="empty-mini">No pudimos cargar este ride.</p>';
-    });
+    }
   </script>
 </body>
 </html>

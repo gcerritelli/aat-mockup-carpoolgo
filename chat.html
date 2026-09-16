@@ -49,6 +49,7 @@
   .msg { max-width: 75%; padding: 10px 14px; border-radius: 16px; font-size: 14px; line-height: 1.4; word-wrap: break-word; }
   .msg.mio { align-self: flex-end; background: #4fd18b; color: #0d2416; border-bottom-right-radius: 4px; }
   .msg.suyo { align-self: flex-start; background: #ffffff; color: #1b2a22; border-bottom-left-radius: 4px; box-shadow: 0 2px 8px rgba(16,50,31,0.06); }
+  .msg .quien { font-size: 11px; font-weight: 700; color: #1565c0; margin-bottom: 3px; }
   .empty-state { text-align: center; padding: 40px 24px; color: #6b7d70; font-size: 14px; margin: auto; }
 
   form.enviar {
@@ -130,8 +131,9 @@
 
     const params = new URLSearchParams(window.location.search);
     const conUid = params.get('con');
+    const rideId = params.get('ride');
 
-    if (!conUid) {
+    if (!conUid && !rideId) {
       window.location.href = 'chats.html';
     }
 
@@ -141,33 +143,63 @@
         return;
       }
       const miUid = user.uid;
-      if (conUid === miUid) {
-        window.location.href = 'chats.html';
-        return;
-      }
 
-      const amistadDoc = await db.collection('usuarios').doc(miUid).collection('amigos').doc(conUid).get();
-      if (!amistadDoc.exists) {
-        window.location.href = 'chats.html';
-        return;
-      }
+      let chatId, coleccion, participantes;
+      const perfiles = {};
+      const esGrupo = !!rideId;
 
-      const perfilDoc = await db.collection('usuarios').doc(conUid).get();
-      const perfil = perfilDoc.exists ? perfilDoc.data() : {};
-      const nombreOtro = perfil.nombre || 'Sin nombre';
+      if (esGrupo) {
+        const rideDoc = await db.collection('rides').doc(rideId).get();
+        if (!rideDoc.exists || !rideDoc.data().participantes.includes(miUid)) {
+          window.location.href = 'chats.html';
+          return;
+        }
+        participantes = rideDoc.data().participantes;
+        chatId = `ride_${rideId}`;
+        coleccion = 'chatsGrupo';
 
-      document.getElementById('nombre-otro').textContent = nombreOtro;
-      const avatarEl = document.getElementById('avatar-otro');
-      if (perfil.fotoURL) {
-        avatarEl.innerHTML = `<img src="${perfil.fotoURL}" alt="">`;
+        const docs = await Promise.all(participantes.map((id) => db.collection('usuarios').doc(id).get()));
+        docs.forEach((d, i) => { perfiles[participantes[i]] = d.exists ? d.data() : { nombre: 'Sin nombre' }; });
+
+        const otros = participantes.filter((id) => id !== miUid).map((id) => (perfiles[id] || {}).nombre || 'Alguien');
+        const nombreGrupo = otros.length <= 2 ? otros.join(' y ') : `${otros.slice(0, 2).join(', ')} y ${otros.length - 2} más`;
+
+        document.getElementById('nombre-otro').textContent = `Ride: ${nombreGrupo}`;
+        document.getElementById('avatar-otro').textContent = '🚗';
+        document.getElementById('link-album').href = `album.html?ride=${encodeURIComponent(rideId)}`;
       } else {
-        avatarEl.textContent = inicial(nombreOtro);
-      }
-      document.getElementById('link-album').href = `album.html?con=${encodeURIComponent(conUid)}`;
+        if (conUid === miUid) {
+          window.location.href = 'chats.html';
+          return;
+        }
 
-      const chatId = chatIdPara(miUid, conUid);
-      const chatRef = db.collection('chats').doc(chatId);
-      await chatRef.set({ participantes: [miUid, conUid] }, { merge: true });
+        const amistadDoc = await db.collection('usuarios').doc(miUid).collection('amigos').doc(conUid).get();
+        if (!amistadDoc.exists) {
+          window.location.href = 'chats.html';
+          return;
+        }
+
+        participantes = [miUid, conUid];
+        chatId = chatIdPara(miUid, conUid);
+        coleccion = 'chats';
+
+        const perfilDoc = await db.collection('usuarios').doc(conUid).get();
+        const perfil = perfilDoc.exists ? perfilDoc.data() : {};
+        perfiles[conUid] = perfil;
+        const nombreOtro = perfil.nombre || 'Sin nombre';
+
+        document.getElementById('nombre-otro').textContent = nombreOtro;
+        const avatarEl = document.getElementById('avatar-otro');
+        if (perfil.fotoURL) {
+          avatarEl.innerHTML = `<img src="${perfil.fotoURL}" alt="">`;
+        } else {
+          avatarEl.textContent = inicial(nombreOtro);
+        }
+        document.getElementById('link-album').href = `album.html?con=${encodeURIComponent(conUid)}`;
+      }
+
+      const chatRef = db.collection(coleccion).doc(chatId);
+      await chatRef.set({ participantes: participantes, rideId: rideId || null }, { merge: true });
 
       const mensajesEl = document.getElementById('mensajes');
 
@@ -179,7 +211,8 @@
         mensajesEl.innerHTML = snap.docs.map((d) => {
           const m = d.data();
           const esMio = m.de === miUid;
-          return `<div class="msg ${esMio ? 'mio' : 'suyo'}">${escapeHtml(m.texto)}</div>`;
+          const nombreDe = esGrupo && !esMio ? `<div class="quien">${escapeHtml((perfiles[m.de] || {}).nombre || 'Alguien')}</div>` : '';
+          return `<div class="msg ${esMio ? 'mio' : 'suyo'}">${nombreDe}${escapeHtml(m.texto)}</div>`;
         }).join('');
         mensajesEl.scrollTop = mensajesEl.scrollHeight;
       });

@@ -353,6 +353,11 @@
         <div class="route-chip" id="ruta-home">Sin trayecto registrado</div>
       </div>
 
+      <div class="card" id="card-rides-pendientes-home" style="display:none;">
+        <h2>Rides pendientes</h2>
+        <div id="lista-rides-pendientes-home"></div>
+      </div>
+
       <div class="card">
         <h2>Organiza un ride</h2>
         <p style="font-size:14px;color:#445248;margin-bottom:12px;">Junta a tus amigos, elige quién maneja, y al final dividimos el gasto de gasolina entre todos.</p>
@@ -1428,6 +1433,30 @@
       const rides = snap.docs
         .map((d) => ({ id: d.id, ...d.data() }))
         .sort((a, b) => (b.creadoEn ? b.creadoEn.toMillis() : 0) - (a.creadoEn ? a.creadoEn.toMillis() : 0));
+
+      const enCurso = rides.filter((r) => r.estado === 'pendiente_host' || r.estado === 'activo');
+      const cardHome = document.getElementById('card-rides-pendientes-home');
+      const listaHome = document.getElementById('lista-rides-pendientes-home');
+      if (enCurso.length > 0) {
+        cardHome.style.display = 'block';
+        listaHome.innerHTML = enCurso.map((r) => {
+          const esHost = r.hostUid === uid;
+          const sub = r.estado === 'pendiente_host'
+            ? (esHost ? 'Te invitaron a manejar — entra a aceptar' : 'Esperando que el host acepte')
+            : `En curso · ${r.participantes.length} personas`;
+          return `
+            <a class="ride-row" href="ride.html?id=${r.id}">
+              <div>
+                <div class="titulo">${esHost ? 'Tú manejas' : 'Ride con amigos'}</div>
+                <div class="sub">${sub}</div>
+              </div>
+              <span class="ride-estado ${r.estado}">${estadoRideLabel(r.estado)}</span>
+            </a>
+          `;
+        }).join('');
+      } else {
+        cardHome.style.display = 'none';
+      }
 
       const invitaciones = rides.filter((r) => r.estado === 'pendiente_host' && r.hostUid === uid);
       const cardInv = document.getElementById('card-invitaciones-ride');

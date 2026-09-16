@@ -104,36 +104,74 @@
       const uid = user.uid;
       const cont = document.getElementById('lista-chats');
 
-      const amigosSnap = await db.collection('usuarios').doc(uid).collection('amigos').get();
-      if (amigosSnap.empty) {
-        cont.innerHTML = '<div class="empty-state">Todavía no tienes amigos. Ve a Buscar en la app para agregar compañeros y empezar a chatear.</div>';
-        return;
+      const [amigosSnap, gruposSnap] = await Promise.all([
+        db.collection('usuarios').doc(uid).collection('amigos').get(),
+        db.collection('chatsGrupo').where('participantes', 'array-contains', uid).get()
+      ]);
+
+      let gruposHtml = '';
+      if (!gruposSnap.empty) {
+        const grupos = await Promise.all(gruposSnap.docs.map(async (d) => {
+          const g = d.data();
+          const rideId = g.rideId || d.id.replace('ride_', '');
+          const otrosIds = (g.participantes || []).filter((id) => id !== uid);
+          const perfiles = await Promise.all(otrosIds.map((id) => db.collection('usuarios').doc(id).get()));
+          const nombres = perfiles.map((p) => (p.exists ? p.data().nombre : null) || 'Alguien');
+          const nombreGrupo = nombres.length <= 2 ? nombres.join(' y ') : `${nombres.slice(0, 2).join(', ')} y ${nombres.length - 2} más`;
+          return {
+            rideId,
+            nombreGrupo,
+            ultimoMensaje: g.ultimoMensaje || 'Aún no hay mensajes. ¡Empieza la conversación! 👋'
+          };
+        }));
+        gruposHtml = `
+          <div style="font-size:13px;color:#6b7d70;text-transform:uppercase;letter-spacing:0.4px;margin:6px 6px 8px;font-weight:700;">Tus rides</div>
+          ${grupos.map((g) => `
+            <a class="chat-row" href="chat.html?ride=${encodeURIComponent(g.rideId)}">
+              <div class="avatar">🚗</div>
+              <div class="chat-info">
+                <div class="name">Ride: ${escapeHtml(g.nombreGrupo)}</div>
+                <div class="preview">${escapeHtml(g.ultimoMensaje)}</div>
+              </div>
+            </a>
+          `).join('')}
+        `;
       }
 
-      const filas = await Promise.all(amigosSnap.docs.map(async (d) => {
-        const amistad = d.data();
-        const perfilDoc = await db.collection('usuarios').doc(d.id).get();
-        const perfil = perfilDoc.exists ? perfilDoc.data() : {};
-        const chatId = chatIdPara(uid, d.id);
-        const chatDoc = await db.collection('chats').doc(chatId).get();
-        const chatData = chatDoc.exists ? chatDoc.data() : {};
-        return {
-          id: d.id,
-          nombre: amistad.nombre,
-          fotoURL: perfil.fotoURL || null,
-          ultimoMensaje: chatData.ultimoMensaje || 'Todavía no han chateado. Di hola 👋'
-        };
-      }));
+      let amigosHtml = '';
+      if (amigosSnap.empty) {
+        if (!gruposHtml) {
+          cont.innerHTML = '<div class="empty-state">Todavía no tienes amigos. Ve a Buscar en la app para agregar compañeros y empezar a chatear.</div>';
+          return;
+        }
+      } else {
+        const filas = await Promise.all(amigosSnap.docs.map(async (d) => {
+          const amistad = d.data();
+          const perfilDoc = await db.collection('usuarios').doc(d.id).get();
+          const perfil = perfilDoc.exists ? perfilDoc.data() : {};
+          const chatId = chatIdPara(uid, d.id);
+          const chatDoc = await db.collection('chats').doc(chatId).get();
+          const chatData = chatDoc.exists ? chatDoc.data() : {};
+          return {
+            id: d.id,
+            nombre: amistad.nombre,
+            fotoURL: perfil.fotoURL || null,
+            ultimoMensaje: chatData.ultimoMensaje || 'Todavía no han chateado. Di hola 👋'
+          };
+        }));
 
-      cont.innerHTML = filas.map((f) => `
-        <a class="chat-row" href="chat.html?con=${encodeURIComponent(f.id)}">
-          <div class="avatar">${f.fotoURL ? `<img src="${f.fotoURL}" alt="">` : escapeHtml(inicial(f.nombre))}</div>
-          <div class="chat-info">
-            <div class="name">${escapeHtml(f.nombre || 'Sin nombre')}</div>
-            <div class="preview">${escapeHtml(f.ultimoMensaje)}</div>
-          </div>
-        </a>
-      `).join('');
+        amigosHtml = filas.map((f) => `
+          <a class="chat-row" href="chat.html?con=${encodeURIComponent(f.id)}">
+            <div class="avatar">${f.fotoURL ? `<img src="${f.fotoURL}" alt="">` : escapeHtml(inicial(f.nombre))}</div>
+            <div class="chat-info">
+              <div class="name">${escapeHtml(f.nombre || 'Sin nombre')}</div>
+              <div class="preview">${escapeHtml(f.ultimoMensaje)}</div>
+            </div>
+          </a>
+        `).join('');
+      }
+
+      cont.innerHTML = gruposHtml + amigosHtml;
     });
   </script>
 </body>
